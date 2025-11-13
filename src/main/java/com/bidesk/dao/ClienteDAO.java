@@ -48,6 +48,30 @@ public class ClienteDAO {
         }
     }
     
+    public int inserirERetornarId(Cliente cliente) {
+        String sql = "INSERT INTO clientes (nome, endereco, cidade) VALUES (?, ?, ?)";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            
+            stmt.setString(1, cliente.getNome());
+            stmt.setString(2, cliente.getEndereco());
+            stmt.setString(3, cliente.getCidade());
+            
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                ResultSet generatedKeys = stmt.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return -1;
+    }
+    
     public boolean atualizar(Cliente cliente) {
         String sql = "UPDATE clientes SET nome = ?, endereco = ?, cidade = ? WHERE id = ?";
         
@@ -87,6 +111,30 @@ public class ClienteDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                Cliente cliente = new Cliente();
+                cliente.setId(rs.getInt("id"));
+                cliente.setNome(rs.getString("nome"));
+                cliente.setEndereco(rs.getString("endereco"));
+                cliente.setCidade(rs.getString("cidade"));
+                return cliente;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
+    
+    public Cliente buscarPorNome(String nome) {
+        String sql = "SELECT * FROM clientes WHERE nome = ? ORDER BY id DESC LIMIT 1";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setString(1, nome);
             ResultSet rs = stmt.executeQuery();
             
             if (rs.next()) {

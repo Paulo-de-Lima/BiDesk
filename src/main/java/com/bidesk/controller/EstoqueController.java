@@ -15,9 +15,9 @@ public class EstoqueController {
         return materialDAO.listarTodos();
     }
     
-    public String inserir(String nome, String unidade, int quantidade) {
+    public String inserir(String nome, int quantidade) {
         try {
-            Material material = new Material(nome, unidade, quantidade);
+            Material material = new Material(nome, quantidade);
             boolean sucesso = materialDAO.inserir(material);
             return sucesso ? null : "Falha ao inserir no banco de dados. Verifique se o banco está configurado corretamente.";
         } catch (java.sql.SQLException e) {
