@@ -8,6 +8,10 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
+import java.text.ParseException;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ClientesView extends JPanel {
     private JTable clientesTable;
@@ -16,6 +20,7 @@ public class ClientesView extends JPanel {
     private DefaultTableModel registrosTableModel;
     private ClientesController controller;
     private Cliente clienteSelecionado;
+    private List<RegistroFinanceiro> registrosFinanceiros;
     
     public ClientesView() {
         controller = new ClientesController();
@@ -81,11 +86,12 @@ public class ClientesView extends JPanel {
         clientesScroll.setPreferredSize(new Dimension(0, 150));
         
         // Tabela de Registros Financeiros
-        String[] registrosColumns = {"N°", "Data", "Registro", "Pago", "Deve"};
+        String[] registrosColumns = {"N°", "Data", "Registro", "Pago", "Deve", "ID"};
         registrosTableModel = new DefaultTableModel(registrosColumns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false;
+                // Permite editar apenas as colunas Pago (3) e Deve (4)
+                return column == 3 || column == 4;
             }
         };
         registrosTable = new JTable(registrosTableModel);
@@ -93,6 +99,24 @@ public class ClientesView extends JPanel {
         registrosTable.getTableHeader().setBackground(new Color(200, 230, 200));
         registrosTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         registrosTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        
+        // Ocultar coluna ID
+        registrosTable.getColumnModel().getColumn(5).setMinWidth(0);
+        registrosTable.getColumnModel().getColumn(5).setMaxWidth(0);
+        registrosTable.getColumnModel().getColumn(5).setWidth(0);
+        
+        // Listener para salvar edições de Pago e Deve
+        registrosTable.getModel().addTableModelListener(e -> {
+            if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
+                int row = e.getFirstRow();
+                int column = e.getColumn();
+                if (row >= 0 && (column == 3 || column == 4)) {
+                    salvarEdicaoRegistro(row, column);
+                }
+            }
+        });
+        
+        registrosFinanceiros = new ArrayList<>();
         
         JScrollPane registrosScroll = new JScrollPane(registrosTable);
         registrosScroll.setBorder(BorderFactory.createTitledBorder("Registros Financeiros"));
@@ -162,27 +186,64 @@ public class ClientesView extends JPanel {
     
     private void carregarRegistrosFinanceiros() {
         registrosTableModel.setRowCount(0);
+        registrosFinanceiros.clear();
         if (clienteSelecionado != null) {
             java.util.List<RegistroFinanceiro> registros = controller.listarRegistrosPorCliente(clienteSelecionado.getId());
             SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
             
             for (RegistroFinanceiro registro : registros) {
+                registrosFinanceiros.add(registro);
                 Object[] row = {
                     registro.getNumero() != null ? registro.getNumero() : "---",
                     registro.getData() != null ? sdf.format(registro.getData()) : "---",
                     registro.getRegistro() != null ? registro.getRegistro() : "---",
-                    registro.getPago() != null ? String.format("%.2f", registro.getPago()) : "---",
-                    registro.getDeve() != null && registro.getDeve().compareTo(BigDecimal.ZERO) > 0 
-                        ? String.format("%.2f", registro.getDeve()) : "---"
+                    registro.getPago() != null ? String.format("%.2f", registro.getPago()) : "0.00",
+                    registro.getDeve() != null ? String.format("%.2f", registro.getDeve()) : "0.00",
+                    registro.getId()
                 };
                 registrosTableModel.addRow(row);
             }
         }
     }
     
+    private void salvarEdicaoRegistro(int row, int column) {
+        if (row < registrosFinanceiros.size()) {
+            RegistroFinanceiro registro = registrosFinanceiros.get(row);
+            try {
+                Object valorObj = registrosTableModel.getValueAt(row, column);
+                String valorStr = valorObj != null ? valorObj.toString() : "0";
+                // Remove espaços e substitui vírgula por ponto
+                valorStr = valorStr.trim().replace(",", ".").replace(" ", "");
+                
+                if (valorStr.isEmpty() || valorStr.equals("---")) {
+                    valorStr = "0";
+                }
+                
+                BigDecimal valor = new BigDecimal(valorStr);
+                
+                if (column == 3) { // Pago
+                    registro.setPago(valor);
+                } else if (column == 4) { // Deve
+                    registro.setDeve(valor);
+                }
+                
+                if (controller.atualizarRegistroFinanceiro(registro)) {
+                    // Atualiza o valor formatado na tabela
+                    registrosTableModel.setValueAt(String.format("%.2f", valor), row, column);
+                } else {
+                    JOptionPane.showMessageDialog(this, "Erro ao salvar alteração!", "Erro", JOptionPane.ERROR_MESSAGE);
+                    carregarRegistrosFinanceiros(); // Recarrega para reverter
+                }
+            } catch (NumberFormatException | ClassCastException e) {
+                JOptionPane.showMessageDialog(this, "Valor inválido! Use números decimais.", "Erro", JOptionPane.ERROR_MESSAGE);
+                carregarRegistrosFinanceiros(); // Recarrega para reverter
+            }
+        }
+    }
+    
     private void mostrarDialogoAdicionarCliente() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Adicionar Cliente", true);
-        dialog.setSize(500, 300);
+        dialog.setSize(500, 450);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         
@@ -209,12 +270,56 @@ public class ClientesView extends JPanel {
         JTextField txtCidade = new JTextField(25);
         formPanel.add(txtCidade, gbc);
         
+        gbc.gridx = 0; gbc.gridy = 3;
+        formPanel.add(new JLabel("Número:"), gbc);
+        gbc.gridx = 1;
+        JTextField txtNumero = new JTextField(25);
+        formPanel.add(txtNumero, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 4;
+        formPanel.add(new JLabel("Data (dd/MM/yyyy):"), gbc);
+        gbc.gridx = 1;
+        JTextField txtData = new JTextField(25);
+        formPanel.add(txtData, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 5;
+        formPanel.add(new JLabel("Registro:"), gbc);
+        gbc.gridx = 1;
+        JTextField txtRegistro = new JTextField(25);
+        formPanel.add(txtRegistro, gbc);
+        
         JPanel buttonPanel = new JPanel(new FlowLayout());
         JButton btnSalvar = new JButton("Salvar");
         JButton btnCancelar = new JButton("Cancelar");
         
         btnSalvar.addActionListener(e -> {
-            if (controller.inserir(txtNome.getText(), txtEndereco.getText(), txtCidade.getText())) {
+            String nome = txtNome.getText().trim();
+            String endereco = txtEndereco.getText().trim();
+            String cidade = txtCidade.getText().trim();
+            String numero = txtNumero.getText().trim();
+            String dataStr = txtData.getText().trim();
+            String registro = txtRegistro.getText().trim();
+            
+            if (nome.isEmpty() || endereco.isEmpty() || cidade.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Por favor, preencha Nome, Endereço e Cidade!", "Atenção", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
+            Date data = null;
+            if (!dataStr.isEmpty()) {
+                try {
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    java.util.Date utilDate = sdf.parse(dataStr);
+                    data = new Date(utilDate.getTime());
+                } catch (ParseException ex) {
+                    JOptionPane.showMessageDialog(dialog, "Data inválida! Use o formato dd/MM/yyyy", "Erro", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+            } else {
+                data = new Date(System.currentTimeMillis()); // Data atual se não informada
+            }
+            
+            if (controller.inserirComRegistro(nome, endereco, cidade, numero, data, registro)) {
                 JOptionPane.showMessageDialog(dialog, "Cliente adicionado com sucesso!");
                 dialog.dispose();
                 carregarDados();

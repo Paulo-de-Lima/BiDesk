@@ -34,7 +34,7 @@ public class EstoqueView extends JPanel {
         titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
         
         // Tabela
-        String[] columns = {"Materiais", "Unidade", "Status", "Ações"};
+        String[] columns = {"Materiais", "Status", "Ações"};
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -51,7 +51,6 @@ public class EstoqueView extends JPanel {
         table.getColumnModel().getColumn(0).setPreferredWidth(400);
         table.getColumnModel().getColumn(1).setPreferredWidth(150);
         table.getColumnModel().getColumn(2).setPreferredWidth(100);
-        table.getColumnModel().getColumn(3).setPreferredWidth(200);
         
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
@@ -107,7 +106,6 @@ public class EstoqueView extends JPanel {
         for (Material material : materiaisList) {
             Object[] row = {
                 material.getNome(),
-                material.getUnidade(),
                 getStatusIcon(material.getStatus()),
                 "Ações" // Placeholder - será renderizado pelo renderer
             };
@@ -234,12 +232,6 @@ public class EstoqueView extends JPanel {
         JTextField txtNome = new JTextField(20);
         formPanel.add(txtNome, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 1;
-        formPanel.add(new JLabel("Unidade:"), gbc);
-        gbc.gridx = 1;
-        JTextField txtUnidade = new JTextField(20);
-        formPanel.add(txtUnidade, gbc);
-        
         gbc.gridx = 0; gbc.gridy = 2;
         formPanel.add(new JLabel("Quantidade:"), gbc);
         gbc.gridx = 1;
@@ -252,7 +244,6 @@ public class EstoqueView extends JPanel {
         
         btnSalvar.addActionListener(e -> {
             String nome = txtNome.getText().trim();
-            String unidade = txtUnidade.getText().trim();
             
             // Validação de campos
             if (nome.isEmpty()) {
@@ -261,13 +252,7 @@ public class EstoqueView extends JPanel {
                 return;
             }
             
-            if (unidade.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Por favor, preencha a unidade do material!", "Validação", JOptionPane.WARNING_MESSAGE);
-                txtUnidade.requestFocus();
-                return;
-            }
-            
-            String resultado = controller.inserir(nome, unidade, (Integer) spinnerQuantidade.getValue());
+            String resultado = controller.inserir(nome, (Integer) spinnerQuantidade.getValue());
             if (resultado == null || resultado.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Material adicionado com sucesso!");
                 dialog.dispose();
@@ -304,12 +289,6 @@ public class EstoqueView extends JPanel {
         JTextField txtNome = new JTextField(material.getNome(), 20);
         formPanel.add(txtNome, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 1;
-        formPanel.add(new JLabel("Unidade:"), gbc);
-        gbc.gridx = 1;
-        JTextField txtUnidade = new JTextField(material.getUnidade(), 20);
-        formPanel.add(txtUnidade, gbc);
-        
         gbc.gridx = 0; gbc.gridy = 2;
         formPanel.add(new JLabel("Quantidade:"), gbc);
         gbc.gridx = 1;
@@ -322,7 +301,6 @@ public class EstoqueView extends JPanel {
         
         btnSalvar.addActionListener(e -> {
             material.setNome(txtNome.getText());
-            material.setUnidade(txtUnidade.getText());
             material.setQuantidade((Integer) spinnerQuantidade.getValue());
             if (controller.atualizar(material)) {
                 JOptionPane.showMessageDialog(dialog, "Material atualizado com sucesso!");

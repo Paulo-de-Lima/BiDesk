@@ -3,7 +3,6 @@ package com.bidesk.model;
 public class Material {
     private int id;
     private String nome;
-    private String unidade;
     private int quantidade;
     private StatusMaterial status;
     
@@ -14,9 +13,8 @@ public class Material {
     public Material() {
     }
     
-    public Material(String nome, String unidade, int quantidade) {
+    public Material(String nome, int quantidade) {
         this.nome = nome;
-        this.unidade = unidade;
         this.quantidade = quantidade;
         atualizarStatus();
     }
@@ -48,13 +46,6 @@ public class Material {
         this.nome = nome;
     }
     
-    public String getUnidade() {
-        return unidade;
-    }
-    
-    public void setUnidade(String unidade) {
-        this.unidade = unidade;
-    }
     
     public int getQuantidade() {
         return quantidade;
