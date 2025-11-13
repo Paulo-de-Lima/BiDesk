@@ -28,10 +28,15 @@ public class EstoqueView extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+     
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+
         // Título
         JLabel titleLabel = new JLabel("Aba Estoque");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         
         // Tabela
         String[] columns = {"Materiais", "Status", "Ações"};
@@ -46,7 +51,7 @@ public class EstoqueView extends JPanel {
         table.getTableHeader().setBackground(new Color(200, 230, 200));
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         table.setFont(new Font("Arial", Font.PLAIN, 14));
-        
+      
         // Ajustar largura das colunas
         table.getColumnModel().getColumn(0).setPreferredWidth(400);
         table.getColumnModel().getColumn(1).setPreferredWidth(150);
@@ -55,13 +60,29 @@ public class EstoqueView extends JPanel {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         
-        // Botão adicionar
+        // Botão adicionar - cor verde da logo com efeito hover
         JButton btnAdicionar = new JButton("+ Adicionar novo material");
-        btnAdicionar.setBackground(new Color(200, 230, 200));
-        btnAdicionar.setForeground(Color.BLACK);
+        btnAdicionar.setBackground(new Color(51, 171, 118)); // Mesma cor verde da logo
+        btnAdicionar.setForeground(Color.WHITE); // Texto branco sobre fundo verde
         btnAdicionar.setFont(new Font("Arial", Font.PLAIN, 14));
         btnAdicionar.setPreferredSize(new Dimension(0, 50));
+        btnAdicionar.setOpaque(true);
+        btnAdicionar.setBorderPainted(false);
+        btnAdicionar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnAdicionar.addActionListener(e -> mostrarDialogoAdicionar());
+        
+        // Efeito hover
+        btnAdicionar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnAdicionar.setBackground(new Color(39, 140, 98)); // Verde mais escuro no hover
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnAdicionar.setBackground(new Color(51, 171, 118)); // Volta para cor original
+            }
+        });
         
         // Legenda
         JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -93,6 +114,7 @@ public class EstoqueView extends JPanel {
         bottomPanel.setBackground(Color.WHITE);
         
         add(bottomPanel, BorderLayout.SOUTH);
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
     }
     
     private void setupLayout() {

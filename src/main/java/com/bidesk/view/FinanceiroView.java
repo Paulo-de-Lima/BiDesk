@@ -23,10 +23,15 @@ public class FinanceiroView extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+     
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+        
         // Título
         JLabel titleLabel = new JLabel("Aba Financeiro");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         
         // Tabela
         String[] columns = {"Data", "Cidade", "Despesa", "Total"};
@@ -62,6 +67,7 @@ public class FinanceiroView extends JPanel {
         add(titleLabel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(btnAdicionar, BorderLayout.SOUTH);
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
     }
     
     private void setupLayout() {

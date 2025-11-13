@@ -21,10 +21,15 @@ public class ManutencaoView extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
+     
+        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+
         // Título
         JLabel titleLabel = new JLabel("Aba Manutenção");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
+        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         
         // Tabela
         String[] columns = {"Cliente", "Título", "Descrição"};
@@ -59,6 +64,7 @@ public class ManutencaoView extends JPanel {
         add(titleLabel, BorderLayout.NORTH);
         add(scrollPane, BorderLayout.CENTER);
         add(btnAdicionar, BorderLayout.SOUTH);
+        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
     }
     
     private void setupLayout() {
