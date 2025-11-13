@@ -1,5 +1,9 @@
 package com.bidesk.view;
 
+import java.awt.Image;
+import java.awt.Dimension;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -122,96 +126,75 @@ public class MainView extends JFrame {
         add(contentArea, BorderLayout.CENTER);
     }
 
-    private void setupSidebar() {
-        JPanel logoPanel = new JPanel() {
-            @Override
-            protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                Graphics2D g2d = (Graphics2D) g.create();
-                g2d.setRenderingHint(java.awt.RenderingHints.KEY_ANTIALIASING, 
-                                    java.awt.RenderingHints.VALUE_ANTIALIAS_ON);
-                g2d.setRenderingHint(java.awt.RenderingHints.KEY_RENDERING,
-                                    java.awt.RenderingHints.VALUE_RENDER_QUALITY);
-                g2d.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION,
-                                    java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    // O método setupSidebar() modificado:
+
+        private void setupSidebar() {
+            // 1. O painel agora é um JPanel simples (não mais anônimo com paintComponent)
+            JPanel logoPanel = new JPanel(new BorderLayout());
+            logoPanel.setPreferredSize(new Dimension(220, 100));
+            logoPanel.setOpaque(false);
+            logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
+
+            // 2. Novo código para carregar e exibir a imagem
+            try {
+                // Tenta carregar a imagem a partir dos recursos do projeto
+                // Altere o caminho "images/bidesk_logo.png" para o caminho real da sua imagem
+                java.net.URL imgURL = getClass().getResource("/images/bidesk_logo.png");
                 
-                if (logoImage != null) {
-                    // Se a imagem existe, desenha ela centralizada
-                    int logoWidth = 160;
-                    int logoHeight = 50;
-                    int logoX = (getWidth() - logoWidth) / 2;
-                    int logoY = (getHeight() - logoHeight) / 2;
-                    Image scaled = logoImage.getScaledInstance(logoWidth, logoHeight, Image.SCALE_SMOOTH);
-                    g2d.drawImage(scaled, logoX, logoY, null);
+                // Dentro do seu método setupSidebar(), no bloco 'try':
+
+                if (imgURL != null) {
+                    ImageIcon originalIcon = new ImageIcon(imgURL);
+                    
+                    // --- Início do código de redimensionamento ---
+                    
+                    // Defina a largura e altura desejadas para o ícone
+                    int desiredWidth = 161; // Exemplo: 32 pixels de largura (tamanho padrão para ícones de barra de título)
+                    int desiredHeight = 60; // 32 pixels de altura
+                    
+                    // Obtém a imagem original, redimensiona e cria um novo ícone
+                    Image img = originalIcon.getImage();
+                    Image resizedImg = img.getScaledInstance(
+                        desiredWidth, 
+                        desiredHeight, 
+                        Image.SCALE_SMOOTH // Usa um algoritmo de redimensionamento de alta qualidade
+                    );
+                    
+                    ImageIcon logoIcon = new ImageIcon(resizedImg);
+                    // --- Fim do código de redimensionamento ---
+
+                    JLabel logoLabel = new JLabel(logoIcon);
+                    logoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                    
+                    logoPanel.add(logoLabel, BorderLayout.CENTER);
                 } else {
-                    // Fallback: desenha programaticamente
-                    int totalWidth = 180;
-                    int startX = (getWidth() - totalWidth) / 2;
-                    int centerY = getHeight() / 2;
-                    
-                    int iconSize = 50;
-                    int iconX = startX;
-                    int iconY = centerY - iconSize / 2;
-                    
-                    // Quadrado arredondado verde (#33AB76)
-                    g2d.setColor(new Color(51, 171, 118));
-                    g2d.fillRoundRect(iconX, iconY, iconSize, iconSize, 8, 8);
-                    
-                    // "B" estilizado branco (fita dobrada)
-                    g2d.setColor(Color.WHITE);
-                    
-                    int padding = 10;
-                    int leftX = iconX + padding;
-                    int rightX = iconX + iconSize - padding;
-                    int topY = iconY + padding;
-                    int midY = iconY + iconSize / 2;
-                    int bottomY = iconY + iconSize - padding;
-                    int width = rightX - leftX;
-                    int height = bottomY - topY;
-                    
-                    GeneralPath bPath = new GeneralPath();
-                    bPath.moveTo(leftX, topY);
-                    bPath.lineTo(leftX + width * 0.55f, topY);
-                    bPath.curveTo(leftX + width * 0.8f, topY, 
-                                 rightX - 2, topY + height * 0.2f, 
-                                 rightX, midY - height * 0.15f);
-                    bPath.curveTo(rightX - 1, midY - height * 0.05f, 
-                                 rightX - width * 0.15f, midY, 
-                                 leftX + width * 0.45f, midY);
-                    bPath.lineTo(leftX, midY);
-                    bPath.closePath();
-                    
-                    GeneralPath bPathBottom = new GeneralPath();
-                    bPathBottom.moveTo(leftX, midY);
-                    bPathBottom.lineTo(leftX + width * 0.45f, midY);
-                    bPathBottom.curveTo(rightX - width * 0.15f, midY, 
-                                       rightX - 1, midY + height * 0.05f, 
-                                       rightX, midY + height * 0.15f);
-                    bPathBottom.curveTo(rightX - 2, bottomY - height * 0.2f, 
-                                       leftX + width * 0.8f, bottomY, 
-                                       leftX + width * 0.55f, bottomY);
-                    bPathBottom.lineTo(leftX, bottomY);
-                    bPathBottom.closePath();
-                    
-                    g2d.fill(bPath);
-                    g2d.fill(bPathBottom);
-                    
-                    int textX = startX + iconSize + 12;
-                    g2d.setColor(new Color(26, 43, 60));
-                    g2d.setFont(new Font("Segoe UI", Font.PLAIN, 24));
-                    java.awt.FontMetrics fm = g2d.getFontMetrics();
-                    int textY = centerY - fm.getHeight() / 2 + fm.getAscent();
-                    g2d.drawString("bidesk", textX, textY);
+                    // Fallback: Exibe apenas o texto caso a imagem não seja encontrada
+                    System.err.println("Atenção: Imagem da logo bidesk_logo.png não encontrada. Usando texto.");
+                    JLabel fallbackLabel = new JLabel("bidesk");
+                    fallbackLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+                    fallbackLabel.setForeground(TEXT_PRIMARY); // Cor de texto já definida
+                    fallbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                    logoPanel.add(fallbackLabel, BorderLayout.CENTER);
                 }
-                
-                g2d.dispose();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-        };
+            
+            // ... O restante do seu método setupSidebar() continua aqui...
+            
+            JPanel menuPanel = new JPanel();
+            menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
+            menuPanel.setOpaque(false);
+            menuPanel.setBorder(BorderFactory.createEmptyBorder(24, 18, 24, 18));
+            
+            // ... (o restante do código dos botões)
+            
+            // ...
+        
         logoPanel.setPreferredSize(new Dimension(220, 100));
         logoPanel.setOpaque(false);
         logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
-        JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setOpaque(false);
         menuPanel.setBorder(BorderFactory.createEmptyBorder(24, 18, 24, 18));
