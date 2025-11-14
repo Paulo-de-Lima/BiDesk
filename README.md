@@ -1,2 +1,3 @@
-# BiDesk
-Projeto Desktop para a empresa Locadora de Bilhar Paulo Afonso
+# BiDesk - Sistema de Gestão Desktop
+
+Aplicação Desktop desenvolvida em Java Swing com MySQL.
