@@ -132,12 +132,28 @@ public class ClientesView extends JPanel {
         actionPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
         
         JButton btnAdicionar = new JButton("+ Adicionar novo cliente");
-        btnAdicionar.setBackground(new Color(200, 230, 200));
-        btnAdicionar.setForeground(Color.BLACK);
+        btnAdicionar.setBackground(new Color(51, 171, 118)); // Mesma cor verde da logo
+        btnAdicionar.setForeground(Color.WHITE);
         btnAdicionar.setFont(new Font("Arial", Font.PLAIN, 14));
         btnAdicionar.setPreferredSize(new Dimension(0, 50));
+        btnAdicionar.setOpaque(true);
+        btnAdicionar.setBorderPainted(false);
+        btnAdicionar.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnAdicionar.addActionListener(e -> mostrarDialogoAdicionarCliente());
         
+        // Efeito hover
+        btnAdicionar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnAdicionar.setBackground(new Color(39, 140, 98)); // Verde mais escuro no hover
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnAdicionar.setBackground(new Color(51, 171, 118)); // Volta para cor original
+            }
+        });
+
         JButton btnFiltrar = new JButton("Filtrar por...");
         btnFiltrar.setFont(new Font("Arial", Font.PLAIN, 12));
         btnFiltrar.setPreferredSize(new Dimension(150, 40));

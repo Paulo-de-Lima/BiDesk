@@ -28,11 +28,6 @@ public class EstoqueView extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         
-        JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(Color.WHITE);
-     
-        contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
-
         // Título
         JLabel titleLabel = new JLabel("Aba Estoque");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
