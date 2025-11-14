@@ -3,6 +3,7 @@ package com.bidesk.view;
 import com.bidesk.controller.ManutencaoController;
 import com.bidesk.model.Manutencao;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 
@@ -27,7 +28,7 @@ public class ManutencaoView extends JPanel {
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
         // Título
-        JLabel titleLabel = new JLabel("Aba Manutenção");
+        JLabel titleLabel = new JLabel("Manutenção");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         
@@ -44,6 +45,9 @@ public class ManutencaoView extends JPanel {
         table.getTableHeader().setBackground(new Color(200, 230, 200));
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         table.setFont(new Font("Arial", Font.PLAIN, 14));
+
+        DefaultTableCellRenderer centerRenderer = (DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
         
         // Ajustar largura das colunas
         table.getColumnModel().getColumn(0).setPreferredWidth(200);
@@ -51,7 +55,7 @@ public class ManutencaoView extends JPanel {
         table.getColumnModel().getColumn(2).setPreferredWidth(400);
         
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
         
         // Botão adicionar
         JButton btnAdicionar = new JButton("+ Adicionar nova manutenção");

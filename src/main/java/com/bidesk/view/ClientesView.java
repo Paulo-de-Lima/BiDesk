@@ -42,7 +42,7 @@ public class ClientesView extends JPanel {
         
         JLabel subtitleLabel = new JLabel("Matcheka");
         subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        subtitleLabel.setForeground(new Color(150, 150, 150));
+        subtitleLabel.setForeground(new Color(240, 240, 240));
         
         titlePanel.add(titleLabel, BorderLayout.WEST);
         titlePanel.add(subtitleLabel, BorderLayout.EAST);

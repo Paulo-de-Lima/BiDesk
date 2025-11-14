@@ -3,6 +3,7 @@ package com.bidesk.view;
 import com.bidesk.controller.FinanceiroController;
 import com.bidesk.model.Despesa;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.math.BigDecimal;
@@ -29,7 +30,7 @@ public class FinanceiroView extends JPanel {
         contentPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
         
         // Título
-        JLabel titleLabel = new JLabel("Aba Financeiro");
+        JLabel titleLabel = new JLabel("Financeiro");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
         
@@ -46,7 +47,10 @@ public class FinanceiroView extends JPanel {
         table.getTableHeader().setBackground(new Color(200, 230, 200));
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         table.setFont(new Font("Arial", Font.PLAIN, 14));
-        
+
+        DefaultTableCellRenderer centerRenderer = (DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+
         // Ajustar largura das colunas
         table.getColumnModel().getColumn(0).setPreferredWidth(200);
         table.getColumnModel().getColumn(1).setPreferredWidth(300);
@@ -54,7 +58,7 @@ public class FinanceiroView extends JPanel {
         table.getColumnModel().getColumn(3).setPreferredWidth(200);
         
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
         
         // Botão adicionar
         JButton btnAdicionar = new JButton("+ Adicionar nova cobrança");
@@ -265,6 +269,7 @@ public class FinanceiroView extends JPanel {
         dialog.add(mainPanel, BorderLayout.CENTER);
         dialog.setVisible(true);
     }
+
 }
 
 
