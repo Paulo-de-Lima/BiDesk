@@ -32,15 +32,15 @@ public class MaterialDAO {
     }
     
     public boolean inserir(Material material) throws SQLException {
-        String sql = "INSERT INTO materiais (nome, quantidade, status) VALUES (?, ?, ?, ?)";
+        String sql = "INSERT INTO materiais (nome, quantidade, status) VALUES (?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             material.atualizarStatus();
             stmt.setString(1, material.getNome());
-            stmt.setInt(3, material.getQuantidade());
-            stmt.setString(4, material.getStatus().name());
+            stmt.setInt(2, material.getQuantidade());
+            stmt.setString(3, material.getStatus().name());
             
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;

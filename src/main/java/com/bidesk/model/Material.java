@@ -46,7 +46,6 @@ public class Material {
         this.nome = nome;
     }
     
-    
     public int getQuantidade() {
         return quantidade;
     }
@@ -64,5 +63,6 @@ public class Material {
         this.status = status;
     }
 }
+
 
 
