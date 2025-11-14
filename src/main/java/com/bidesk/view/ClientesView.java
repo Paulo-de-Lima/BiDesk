@@ -259,54 +259,135 @@ public class ClientesView extends JPanel {
     
     private void mostrarDialogoAdicionarCliente() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Adicionar Cliente", true);
-        dialog.setSize(500, 450);
+        dialog.setSize(550, 550);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
+        dialog.getContentPane().setBackground(Color.WHITE);
+        
+        // Painel principal com padding
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
         
         JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(15, 0, 15, 0);
+        gbc.anchor = GridBagConstraints.CENTER;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
         
         gbc.gridx = 0; gbc.gridy = 0;
-        formPanel.add(new JLabel("Nome:"), gbc);
-        gbc.gridx = 1;
-        JTextField txtNome = new JTextField(25);
+        PlaceholderTextField txtNome = new PlaceholderTextField("Nome");
+        txtNome.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        txtNome.setPreferredSize(new Dimension(0, 40));
+        txtNome.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
         formPanel.add(txtNome, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 1;
-        formPanel.add(new JLabel("Endereço:"), gbc);
-        gbc.gridx = 1;
-        JTextField txtEndereco = new JTextField(25);
+        gbc.gridy = 1;
+        PlaceholderTextField txtEndereco = new PlaceholderTextField("Endereço");
+        txtEndereco.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        txtEndereco.setPreferredSize(new Dimension(0, 40));
+        txtEndereco.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
         formPanel.add(txtEndereco, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 2;
-        formPanel.add(new JLabel("Cidade:"), gbc);
-        gbc.gridx = 1;
-        JTextField txtCidade = new JTextField(25);
+        gbc.gridy = 2;
+        PlaceholderTextField txtCidade = new PlaceholderTextField("Cidade");
+        txtCidade.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        txtCidade.setPreferredSize(new Dimension(0, 40));
+        txtCidade.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
         formPanel.add(txtCidade, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 3;
-        formPanel.add(new JLabel("Número:"), gbc);
-        gbc.gridx = 1;
-        JTextField txtNumero = new JTextField(25);
+        gbc.gridy = 3;
+        PlaceholderTextField txtNumero = new PlaceholderTextField("Número");
+        txtNumero.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        txtNumero.setPreferredSize(new Dimension(0, 40));
+        txtNumero.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
         formPanel.add(txtNumero, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 4;
-        formPanel.add(new JLabel("Data (dd/MM/yyyy):"), gbc);
-        gbc.gridx = 1;
-        JTextField txtData = new JTextField(25);
+        gbc.gridy = 4;
+        PlaceholderTextField txtData = new PlaceholderTextField("Data (dd/MM/yyyy)");
+        txtData.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        txtData.setPreferredSize(new Dimension(0, 40));
+        txtData.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
         formPanel.add(txtData, gbc);
         
-        gbc.gridx = 0; gbc.gridy = 5;
-        formPanel.add(new JLabel("Registro:"), gbc);
-        gbc.gridx = 1;
-        JTextField txtRegistro = new JTextField(25);
+        gbc.gridy = 5;
+        PlaceholderTextField txtRegistro = new PlaceholderTextField("Registro");
+        txtRegistro.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        txtRegistro.setPreferredSize(new Dimension(0, 40));
+        txtRegistro.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
         formPanel.add(txtRegistro, gbc);
         
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton btnSalvar = new JButton("Salvar");
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+        
+        // Painel de botões
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
+        
+        // Botão Cancelar
         JButton btnCancelar = new JButton("Cancelar");
+        btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnCancelar.setBackground(new Color(232, 236, 240));
+        btnCancelar.setForeground(new Color(41, 50, 65));
+        btnCancelar.setPreferredSize(new Dimension(130, 45));
+        btnCancelar.setBorderPainted(false);
+        btnCancelar.setOpaque(true);
+        btnCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCancelar.setFocusPainted(false);
+        btnCancelar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnCancelar.setBackground(new Color(214, 222, 228));
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnCancelar.setBackground(new Color(232, 236, 240));
+            }
+        });
+        btnCancelar.addActionListener(e -> dialog.dispose());
+        
+        // Botão Salvar
+        JButton btnSalvar = new JButton("Salvar");
+        btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnSalvar.setBackground(new Color(51, 171, 118));
+        btnSalvar.setForeground(Color.WHITE);
+        btnSalvar.setPreferredSize(new Dimension(130, 45));
+        btnSalvar.setBorderPainted(false);
+        btnSalvar.setOpaque(true);
+        btnSalvar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnSalvar.setFocusPainted(false);
+        btnSalvar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnSalvar.setBackground(new Color(39, 140, 98));
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnSalvar.setBackground(new Color(51, 171, 118));
+            }
+        });
         
         btnSalvar.addActionListener(e -> {
             String nome = txtNome.getText().trim();
@@ -344,13 +425,11 @@ public class ClientesView extends JPanel {
             }
         });
         
-        btnCancelar.addActionListener(e -> dialog.dispose());
-        
-        buttonPanel.add(btnSalvar);
         buttonPanel.add(btnCancelar);
+        buttonPanel.add(btnSalvar);
         
-        dialog.add(formPanel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.add(mainPanel, BorderLayout.CENTER);
         dialog.setVisible(true);
     }
 }

@@ -8,8 +8,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.AbstractCellEditor;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 public class EstoqueView extends JPanel {
     private JTable table;
@@ -55,10 +53,9 @@ public class EstoqueView extends JPanel {
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         
-        // Botão adicionar - cor verde da logo com efeito hover
         JButton btnAdicionar = new JButton("+ Adicionar novo material");
-        btnAdicionar.setBackground(new Color(51, 171, 118)); // Mesma cor verde da logo
-        btnAdicionar.setForeground(Color.WHITE); // Texto branco sobre fundo verde
+        btnAdicionar.setBackground(new Color(51, 171, 118)); 
+        btnAdicionar.setForeground(Color.WHITE); 
         btnAdicionar.setFont(new Font("Arial", Font.PLAIN, 14));
         btnAdicionar.setPreferredSize(new Dimension(0, 50));
         btnAdicionar.setOpaque(true);
@@ -233,61 +230,149 @@ public class EstoqueView extends JPanel {
     }
     
     private void mostrarDialogoAdicionar() {
-        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Adicionar Material", true);
-        dialog.setSize(400, 250);
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
+                "Adicionar Material", true);
+        dialog.setSize(600, 400);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
-        
+        dialog.getContentPane().setBackground(Color.WHITE);
+    
+        // Painel principal com padding
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+    
+        // Painel do formulário (campos em coluna, igual ao Adicionar Cliente)
         JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
+    
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.anchor = GridBagConstraints.WEST;
-        
-        gbc.gridx = 0; gbc.gridy = 0;
-        formPanel.add(new JLabel("Nome:"), gbc);
-        gbc.gridx = 1;
-        JTextField txtNome = new JTextField(20);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.insets = new Insets(10, 0, 10, 0);
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        gbc.weightx = 1.0;
+    
+        // CAMPO NOME (placeholder, igual ao de cliente)
+        PlaceholderTextField txtNome = new PlaceholderTextField("Nome");
+        txtNome.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        txtNome.setPreferredSize(new Dimension(0, 40));
+        txtNome.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)
+        ));
         formPanel.add(txtNome, gbc);
-        
-        gbc.gridx = 0; gbc.gridy = 2;
-        formPanel.add(new JLabel("Quantidade:"), gbc);
-        gbc.gridx = 1;
-        JSpinner spinnerQuantidade = new JSpinner(new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
+    
+        // CAMPO QUANTIDADE (logo abaixo, mesma largura)
+        // CAMPO QUANTIDADE (logo abaixo, mesma largura)
+        gbc.gridy++;
+
+        JSpinner spinnerQuantidade = new JSpinner(
+                new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1) // Começa com 0
+        );
+        spinnerQuantidade.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        spinnerQuantidade.setPreferredSize(new Dimension(0, 40));
+
+        JComponent editor = spinnerQuantidade.getEditor();
+        if (editor instanceof JSpinner.DefaultEditor) {
+            JTextField spinnerField = ((JSpinner.DefaultEditor) editor).getTextField();
+            spinnerField.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(8, 12, 8, 12)
+            ));
+        }
+
         formPanel.add(spinnerQuantidade, gbc);
-        
-        JPanel buttonPanel = new JPanel(new FlowLayout());
-        JButton btnSalvar = new JButton("Salvar");
+
+    
+        formPanel.add(spinnerQuantidade, gbc);
+    
+        mainPanel.add(formPanel, BorderLayout.CENTER);
+    
+        // ----- BOTÕES (igual estilo do cliente) -----
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
+    
         JButton btnCancelar = new JButton("Cancelar");
-        
+        btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnCancelar.setBackground(new Color(232, 236, 240));
+        btnCancelar.setForeground(new Color(41, 50, 65));
+        btnCancelar.setPreferredSize(new Dimension(130, 45));
+        btnCancelar.setBorderPainted(false);
+        btnCancelar.setOpaque(true);
+        btnCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCancelar.setFocusPainted(false);
+        btnCancelar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnCancelar.setBackground(new Color(214, 222, 228));
+            }
+    
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnCancelar.setBackground(new Color(232, 236, 240));
+            }
+        });
+        btnCancelar.addActionListener(e -> dialog.dispose());
+    
+        JButton btnSalvar = new JButton("Salvar");
+        btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnSalvar.setBackground(new Color(51, 171, 118));
+        btnSalvar.setForeground(Color.WHITE);
+        btnSalvar.setPreferredSize(new Dimension(130, 45));
+        btnSalvar.setBorderPainted(false);
+        btnSalvar.setOpaque(true);
+        btnSalvar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnSalvar.setFocusPainted(false);
+        btnSalvar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnSalvar.setBackground(new Color(39, 140, 98));
+            }
+    
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnSalvar.setBackground(new Color(51, 171, 118));
+            }
+        });
+    
         btnSalvar.addActionListener(e -> {
             String nome = txtNome.getText().trim();
-            
-            // Validação de campos
+    
             if (nome.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Por favor, preencha o nome do material!", "Validação", JOptionPane.WARNING_MESSAGE);
+                JOptionPane.showMessageDialog(dialog,
+                        "Por favor, preencha o nome do material!",
+                        "Validação",
+                        JOptionPane.WARNING_MESSAGE);
                 txtNome.requestFocus();
                 return;
             }
-            
-            String resultado = controller.inserir(nome, (Integer) spinnerQuantidade.getValue());
+    
+            int quantidade = (Integer) spinnerQuantidade.getValue();
+            String resultado = controller.inserir(nome, quantidade);
+    
             if (resultado == null || resultado.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Material adicionado com sucesso!");
                 dialog.dispose();
                 carregarDados();
             } else {
-                JOptionPane.showMessageDialog(dialog, "Erro ao adicionar material:\n" + resultado, "Erro", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(dialog,
+                        "Erro ao adicionar material:\n" + resultado,
+                        "Erro",
+                        JOptionPane.ERROR_MESSAGE);
             }
         });
-        
-        btnCancelar.addActionListener(e -> dialog.dispose());
-        
-        buttonPanel.add(btnSalvar);
+    
         buttonPanel.add(btnCancelar);
-        
-        dialog.add(formPanel, BorderLayout.CENTER);
-        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        buttonPanel.add(btnSalvar);
+    
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.add(mainPanel, BorderLayout.CENTER);
+    
         dialog.setVisible(true);
     }
+    
     
     private void mostrarDialogoEditar(Material material) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Editar Material", true);
