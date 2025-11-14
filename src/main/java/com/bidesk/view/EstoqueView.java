@@ -27,12 +27,15 @@ public class EstoqueView extends JPanel {
     private void initializeComponents() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
+
+        JPanel contentPanel = new JPanel(new BorderLayout());
+        contentPanel.setBackground(Color.WHITE);
         
         // Título
-        JLabel titleLabel = new JLabel("Aba Estoque");
+        JLabel titleLabel = new JLabel("Estoque");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
-        
+
         // Tabela
         String[] columns = {"Materiais", "Status", "Ações"};
         tableModel = new DefaultTableModel(columns, 0) {
@@ -47,13 +50,16 @@ public class EstoqueView extends JPanel {
         table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
         table.setFont(new Font("Arial", Font.PLAIN, 14));
       
+        DefaultTableCellRenderer centerRenderer = (DefaultTableCellRenderer)table.getTableHeader().getDefaultRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        
         // Ajustar largura das colunas
         table.getColumnModel().getColumn(0).setPreferredWidth(400);
         table.getColumnModel().getColumn(1).setPreferredWidth(150);
         table.getColumnModel().getColumn(2).setPreferredWidth(100);
         
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
         
         // Botão adicionar - cor verde da logo com efeito hover
         JButton btnAdicionar = new JButton("+ Adicionar novo material");

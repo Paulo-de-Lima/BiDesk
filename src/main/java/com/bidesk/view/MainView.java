@@ -23,7 +23,7 @@ public class MainView extends JFrame {
     private static final long serialVersionUID = 1L;
 
     private static final Color SIDEBAR_BACKGROUND = Color.WHITE;
-    private static final Color SIDEBAR_BORDER = new Color(51, 171, 118);
+    private static final Color SIDEBAR_BORDER = Color.WHITE;
     private static final Color BUTTON_BACKGROUND = Color.WHITE;
     private static final Color BUTTON_HOVER = new Color(245, 250, 247);
     private static final Color BUTTON_SELECTED = new Color(229, 243, 234); // Verde claro para item selecionado
@@ -66,8 +66,6 @@ public class MainView extends JFrame {
         cardPanel = new JPanel(cardLayout);
         cardPanel.setOpaque(false);
         cardPanel.setBackground(Color.WHITE);
-        cardPanel.setBorder(BorderFactory.createEmptyBorder(24, 24, 24, 24));
-
         // Inicializar views
         estoqueView = new EstoqueView();
         clientesView = new ClientesView();
@@ -83,8 +81,7 @@ public class MainView extends JFrame {
         sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 3, SIDEBAR_BORDER));
 
         contentArea = new JPanel(new BorderLayout());
-        contentArea.setBackground(new Color(229, 243, 234));
-        contentArea.setBorder(BorderFactory.createEmptyBorder(0, 12, 12, 12));
+        contentArea.setBackground(new Color(51, 171, 118));
 
         add(sidebar, BorderLayout.WEST);
         add(contentArea, BorderLayout.CENTER);
@@ -94,7 +91,7 @@ public class MainView extends JFrame {
         JPanel logoPanel = new JPanel(new BorderLayout());
         logoPanel.setPreferredSize(new Dimension(220, 100));
         logoPanel.setOpaque(true);
-        logoPanel.setBackground(new Color(51, 171, 118)); // Fundo verde
+        logoPanel.setBackground(new Color(31, 151, 98)); // Fundo verde
         logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
         // Carregar e exibir a logo
