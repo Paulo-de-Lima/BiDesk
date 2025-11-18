@@ -40,12 +40,7 @@ public class ClientesView extends JPanel {
         JLabel titleLabel = new JLabel("Aba Clientes");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         
-        JLabel subtitleLabel = new JLabel("Matcheka");
-        subtitleLabel.setFont(new Font("Arial", Font.PLAIN, 12));
-        subtitleLabel.setForeground(new Color(240, 240, 240));
-        
         titlePanel.add(titleLabel, BorderLayout.WEST);
-        titlePanel.add(subtitleLabel, BorderLayout.EAST);
         
         // Painel principal com scroll
         JPanel mainPanel = new JPanel();

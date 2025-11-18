@@ -25,7 +25,7 @@ public class EstoqueController {
             if (e.getMessage().contains("Access denied")) {
                 mensagem += "\n\nVerifique as credenciais do banco de dados em DatabaseConnection.java";
             } else if (e.getMessage().contains("Unknown database")) {
-                mensagem += "\n\nO banco de dados 'bidesk' não existe. Execute o script database/schema.sql";
+                mensagem += "\n\nO banco de dados 'bidesk_db' não existe. Execute o script database/schema.sql";
             } else if (e.getMessage().contains("Table") && e.getMessage().contains("doesn't exist")) {
                 mensagem += "\n\nA tabela não existe. Execute o script database/schema.sql";
             } else if (e.getMessage().contains("Communications link failure") || e.getMessage().contains("Connection refused")) {
