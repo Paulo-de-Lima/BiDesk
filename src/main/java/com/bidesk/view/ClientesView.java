@@ -2,8 +2,9 @@ package com.bidesk.view;
 
 import com.bidesk.controller.ClientesController;
 import com.bidesk.model.Cliente;
-import com.bidesk.model.RegistroFinanceiro;
+import com.bidesk.model.Mesa;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
 import java.math.BigDecimal;
@@ -11,19 +12,33 @@ import java.text.SimpleDateFormat;
 import java.text.ParseException;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ClientesView extends JPanel {
-    private JTable clientesTable;
-    private JTable registrosTable;
-    private DefaultTableModel clientesTableModel;
-    private DefaultTableModel registrosTableModel;
+    private JTable tabelaMesclada;
+    private DefaultTableModel tableModel;
     private ClientesController controller;
-    private Cliente clienteSelecionado;
-    private List<RegistroFinanceiro> registrosFinanceiros;
+    private Map<Integer, Cliente> clientesMap;
+    private List<LinhaTabela> linhasTabela;
+    
+    private class LinhaTabela {
+        Cliente cliente;
+        Mesa mesa;
+        boolean isPrimeiraLinha;
+        
+        LinhaTabela(Cliente cliente, Mesa mesa, boolean isPrimeiraLinha) {
+            this.cliente = cliente;
+            this.mesa = mesa;
+            this.isPrimeiraLinha = isPrimeiraLinha;
+        }
+    }
     
     public ClientesView() {
         controller = new ClientesController();
+        clientesMap = new HashMap<>();
+        linhasTabela = new ArrayList<>();
         initializeComponents();
         setupLayout();
     }
@@ -32,222 +47,294 @@ public class ClientesView extends JPanel {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
         
-        // Título
         JPanel titlePanel = new JPanel(new BorderLayout());
         titlePanel.setBackground(Color.WHITE);
         titlePanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 10, 20));
         
-        JLabel titleLabel = new JLabel("Aba Clientes");
+        JLabel titleLabel = new JLabel("Clientes e Mesas");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        
         titlePanel.add(titleLabel, BorderLayout.WEST);
         
-        // Painel principal com scroll
-        JPanel mainPanel = new JPanel();
-        mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
-        mainPanel.setBackground(Color.WHITE);
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-        
-        // Tabela de Clientes
-        String[] clientesColumns = {"Nome", "Endereço", "Cidade", "ID"};
-        clientesTableModel = new DefaultTableModel(clientesColumns, 0) {
+        String[] columns = {"Nome", "Endereço", "Cidade", "Nº Mesa", "Data", "Registro", "Pago", "Deve", "Ações", "ClienteID", "MesaID"};
+        tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false;
+                return column == 6 || column == 7;
             }
         };
-        clientesTable = new JTable(clientesTableModel);
-        clientesTable.setRowHeight(35);
-        clientesTable.getTableHeader().setBackground(new Color(200, 230, 200));
-        clientesTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
-        clientesTable.setFont(new Font("Arial", Font.PLAIN, 14));
-        clientesTable.getSelectionModel().addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                int selectedRow = clientesTable.getSelectedRow();
-                if (selectedRow >= 0) {
-                    int clienteId = (Integer) clientesTableModel.getValueAt(selectedRow, 3);
-                    clienteSelecionado = controller.buscarClientePorId(clienteId);
-                    carregarRegistrosFinanceiros();
-                }
-            }
-        });
-        // Ocultar coluna ID
-        clientesTable.getColumnModel().getColumn(3).setMinWidth(0);
-        clientesTable.getColumnModel().getColumn(3).setMaxWidth(0);
-        clientesTable.getColumnModel().getColumn(3).setWidth(0);
         
-        JScrollPane clientesScroll = new JScrollPane(clientesTable);
-        clientesScroll.setBorder(BorderFactory.createTitledBorder("Clientes"));
-        clientesScroll.setPreferredSize(new Dimension(0, 150));
+        tabelaMesclada = new JTable(tableModel);
+        tabelaMesclada.setRowHeight(50);
+        tabelaMesclada.getTableHeader().setBackground(new Color(200, 230, 200));
+        tabelaMesclada.getTableHeader().setFont(new Font("Arial", Font.BOLD, 13));
+        tabelaMesclada.setFont(new Font("Arial", Font.PLAIN, 13));
         
-        // Tabela de Registros Financeiros
-        String[] registrosColumns = {"N°", "Data", "Registro", "Pago", "Deve", "ID"};
-        registrosTableModel = new DefaultTableModel(registrosColumns, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                // Permite editar apenas as colunas Pago (3) e Deve (4)
-                return column == 3 || column == 4;
-            }
-        };
-        registrosTable = new JTable(registrosTableModel);
-        registrosTable.setRowHeight(35);
-        registrosTable.getTableHeader().setBackground(new Color(200, 230, 200));
-        registrosTable.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
-        registrosTable.setFont(new Font("Arial", Font.PLAIN, 14));
+        // Ocultar colunas de ID
+        tabelaMesclada.getColumnModel().getColumn(9).setMinWidth(0);
+        tabelaMesclada.getColumnModel().getColumn(9).setMaxWidth(0);
+        tabelaMesclada.getColumnModel().getColumn(10).setMinWidth(0);
+        tabelaMesclada.getColumnModel().getColumn(10).setMaxWidth(0);
         
-        // Ocultar coluna ID
-        registrosTable.getColumnModel().getColumn(5).setMinWidth(0);
-        registrosTable.getColumnModel().getColumn(5).setMaxWidth(0);
-        registrosTable.getColumnModel().getColumn(5).setWidth(0);
+        // Ajustar larguras
+        tabelaMesclada.getColumnModel().getColumn(0).setPreferredWidth(150);
+        tabelaMesclada.getColumnModel().getColumn(1).setPreferredWidth(150);
+        tabelaMesclada.getColumnModel().getColumn(2).setPreferredWidth(100);
+        tabelaMesclada.getColumnModel().getColumn(3).setPreferredWidth(80);
+        tabelaMesclada.getColumnModel().getColumn(4).setPreferredWidth(100);
+        tabelaMesclada.getColumnModel().getColumn(5).setPreferredWidth(100);
+        tabelaMesclada.getColumnModel().getColumn(6).setPreferredWidth(80);
+        tabelaMesclada.getColumnModel().getColumn(7).setPreferredWidth(80);
+        tabelaMesclada.getColumnModel().getColumn(8).setPreferredWidth(180);
         
-        // Listener para salvar edições de Pago e Deve
-        registrosTable.getModel().addTableModelListener(e -> {
+        // Centralizar cabeçalhos
+        DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+        centerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        for (int i = 3; i < 8; i++) {
+            tabelaMesclada.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
+        }
+        
+        // Renderer para coluna de ações
+        tabelaMesclada.getColumnModel().getColumn(8).setCellRenderer(new AcoesRenderer());
+        tabelaMesclada.getColumnModel().getColumn(8).setCellEditor(new AcoesEditor());
+        
+        // Listener para salvar edições
+        tableModel.addTableModelListener(e -> {
             if (e.getType() == javax.swing.event.TableModelEvent.UPDATE) {
                 int row = e.getFirstRow();
                 int column = e.getColumn();
-                if (row >= 0 && (column == 3 || column == 4)) {
-                    salvarEdicaoRegistro(row, column);
+                if (row >= 0 && (column == 6 || column == 7)) {
+                    salvarEdicaoMesa(row, column);
                 }
             }
         });
         
-        registrosFinanceiros = new ArrayList<>();
+        JScrollPane scrollPane = new JScrollPane(tabelaMesclada);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
         
-        JScrollPane registrosScroll = new JScrollPane(registrosTable);
-        registrosScroll.setBorder(BorderFactory.createTitledBorder("Registros Financeiros"));
-        registrosScroll.setPreferredSize(new Dimension(0, 200));
-        
-        mainPanel.add(clientesScroll);
-        mainPanel.add(Box.createVerticalStrut(10));
-        mainPanel.add(registrosScroll);
-        
-        // Painel de ações
         JPanel actionPanel = new JPanel(new BorderLayout());
         actionPanel.setBackground(Color.WHITE);
         actionPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
         
-        JButton btnAdicionar = new JButton("+ Adicionar novo cliente");
-        btnAdicionar.setBackground(new Color(51, 171, 118)); // Mesma cor verde da logo
-        btnAdicionar.setForeground(Color.WHITE);
-        btnAdicionar.setFont(new Font("Arial", Font.PLAIN, 14));
-        btnAdicionar.setPreferredSize(new Dimension(0, 50));
-        btnAdicionar.setOpaque(true);
-        btnAdicionar.setBorderPainted(false);
-        btnAdicionar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnAdicionar.addActionListener(e -> mostrarDialogoAdicionarCliente());
+        JButton btnAdicionarCliente = new JButton("+ Adicionar Cliente");
+        btnAdicionarCliente.setBackground(new Color(51, 171, 118));
+        btnAdicionarCliente.setForeground(Color.WHITE);
+        btnAdicionarCliente.setFont(new Font("Arial", Font.PLAIN, 14));
+        btnAdicionarCliente.setPreferredSize(new Dimension(200, 50));
+        btnAdicionarCliente.setOpaque(true);
+        btnAdicionarCliente.setBorderPainted(false);
+        btnAdicionarCliente.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnAdicionarCliente.addActionListener(e -> mostrarDialogoAdicionarCliente());
         
-        // Efeito hover
-        btnAdicionar.addMouseListener(new java.awt.event.MouseAdapter() {
+        btnAdicionarCliente.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnAdicionar.setBackground(new Color(39, 140, 98)); // Verde mais escuro no hover
+                btnAdicionarCliente.setBackground(new Color(39, 140, 98));
             }
             
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnAdicionar.setBackground(new Color(51, 171, 118)); // Volta para cor original
+                btnAdicionarCliente.setBackground(new Color(51, 171, 118));
             }
         });
-
-        JButton btnFiltrar = new JButton("Filtrar por...");
-        btnFiltrar.setFont(new Font("Arial", Font.PLAIN, 12));
-        btnFiltrar.setPreferredSize(new Dimension(150, 40));
         
-        JTextField txtPesquisar = new JTextField("Pesquisar...");
-        txtPesquisar.setPreferredSize(new Dimension(200, 40));
-        txtPesquisar.setFont(new Font("Arial", Font.PLAIN, 12));
-        
-        JPanel searchPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        searchPanel.setBackground(Color.WHITE);
-        searchPanel.add(btnFiltrar);
-        searchPanel.add(txtPesquisar);
-        
-        actionPanel.add(btnAdicionar, BorderLayout.CENTER);
-        actionPanel.add(searchPanel, BorderLayout.EAST);
+        actionPanel.add(btnAdicionarCliente, BorderLayout.CENTER);
         
         add(titlePanel, BorderLayout.NORTH);
-        add(mainPanel, BorderLayout.CENTER);
+        add(scrollPane, BorderLayout.CENTER);
         add(actionPanel, BorderLayout.SOUTH);
     }
     
+    private class AcoesRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                boolean isSelected, boolean hasFocus, int row, int column) {
+            
+            JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
+            panel.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+            
+            if (row < linhasTabela.size()) {
+                LinhaTabela linhaTabela = linhasTabela.get(row);
+                
+                if (linhaTabela.isPrimeiraLinha) {
+                    JLabel lblEditar = new JLabel("Editar");
+                    lblEditar.setFont(new Font("Arial", Font.PLAIN, 12));
+                    lblEditar.setForeground(new Color(0, 100, 200));
+                    
+                    JLabel lblExcluir = new JLabel("Excluir");
+                    lblExcluir.setFont(new Font("Arial", Font.PLAIN, 12));
+                    lblExcluir.setForeground(Color.RED);
+                    
+                    panel.add(lblEditar);
+                    panel.add(new JLabel("|"));
+                    panel.add(lblExcluir);
+                }
+            }
+            
+            return panel;
+        }
+    }
+    
+    private class AcoesEditor extends AbstractCellEditor implements javax.swing.table.TableCellEditor {
+        private JPanel panel;
+        private int currentRow;
+        
+        public AcoesEditor() {
+            panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 8));
+        }
+        
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                boolean isSelected, int row, int column) {
+            panel.removeAll();
+            panel.setBackground(Color.WHITE);
+            currentRow = row;
+            
+            if (row < linhasTabela.size()) {
+                LinhaTabela linhaTabela = linhasTabela.get(row);
+                
+                if (linhaTabela.isPrimeiraLinha) {
+                    JButton btnEditar = new JButton("Editar");
+                    btnEditar.setFont(new Font("Arial", Font.PLAIN, 12));
+                    btnEditar.setForeground(new Color(0, 100, 200));
+                    btnEditar.setBorderPainted(false);
+                    btnEditar.setContentAreaFilled(false);
+                    btnEditar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    btnEditar.addActionListener(e -> {
+                        fireEditingStopped();
+                        editarCliente(linhaTabela.cliente);
+                    });
+                    
+                    JButton btnExcluir = new JButton("Excluir");
+                    btnExcluir.setFont(new Font("Arial", Font.PLAIN, 12));
+                    btnExcluir.setForeground(Color.RED);
+                    btnExcluir.setBorderPainted(false);
+                    btnExcluir.setContentAreaFilled(false);
+                    btnExcluir.setCursor(new Cursor(Cursor.HAND_CURSOR));
+                    btnExcluir.addActionListener(e -> {
+                        fireEditingStopped();
+                        excluirCliente(linhaTabela.cliente);
+                    });
+                    
+                    panel.add(btnEditar);
+                    panel.add(new JLabel("|"));
+                    panel.add(btnExcluir);
+                }
+            }
+            
+            return panel;
+        }
+        
+        @Override
+        public Object getCellEditorValue() {
+            return "";
+        }
+    }
+    
     private void setupLayout() {
-        // Layout já configurado
     }
     
     public void carregarDados() {
-        carregarClientes();
-        clienteSelecionado = null;
-        registrosTableModel.setRowCount(0);
-    }
-    
-    private void carregarClientes() {
-        clientesTableModel.setRowCount(0);
-        java.util.List<Cliente> clientes = controller.listarTodos();
+        tableModel.setRowCount(0);
+        linhasTabela.clear();
+        clientesMap.clear();
         
-        for (Cliente cliente : clientes) {
-            Object[] row = {
-                cliente.getNome(),
-                cliente.getEndereco(),
-                cliente.getCidade(),
-                cliente.getId() // Armazenar ID na última coluna
-            };
-            clientesTableModel.addRow(row);
-        }
-    }
-    
-    private void carregarRegistrosFinanceiros() {
-        registrosTableModel.setRowCount(0);
-        registrosFinanceiros.clear();
-        if (clienteSelecionado != null) {
-            java.util.List<RegistroFinanceiro> registros = controller.listarRegistrosPorCliente(clienteSelecionado.getId());
-            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        
+        try {
+            List<Cliente> clientes = controller.listarTodos();
+            System.out.println("Clientes carregados: " + (clientes != null ? clientes.size() : 0));
             
-            for (RegistroFinanceiro registro : registros) {
-                registrosFinanceiros.add(registro);
-                Object[] row = {
-                    registro.getNumero() != null ? registro.getNumero() : "---",
-                    registro.getData() != null ? sdf.format(registro.getData()) : "---",
-                    registro.getRegistro() != null ? registro.getRegistro() : "---",
-                    registro.getPago() != null ? String.format("%.2f", registro.getPago()) : "0.00",
-                    registro.getDeve() != null ? String.format("%.2f", registro.getDeve()) : "0.00",
-                    registro.getId()
-                };
-                registrosTableModel.addRow(row);
+            if (clientes == null || clientes.isEmpty()) {
+                System.out.println("Nenhum cliente encontrado no banco de dados.");
+                return;
             }
+            
+            for (Cliente cliente : clientes) {
+                clientesMap.put(cliente.getId(), cliente);
+                List<Mesa> mesas = controller.listarMesasPorCliente(cliente.getId());
+                System.out.println("Cliente: " + cliente.getNome() + " - Mesas: " + (mesas != null ? mesas.size() : 0));
+                
+                if (mesas == null || mesas.isEmpty()) {
+                    LinhaTabela linha = new LinhaTabela(cliente, null, true);
+                    linhasTabela.add(linha);
+                    
+                    Object[] row = {
+                        cliente.getNome(),
+                        cliente.getEndereco(),
+                        cliente.getCidade(),
+                        "---",
+                        "---",
+                        "---",
+                        "0.00",
+                        "0.00",
+                        "",
+                        cliente.getId(),
+                        null
+                    };
+                    tableModel.addRow(row);
+                } else {
+                    boolean primeiraLinha = true;
+                    for (Mesa mesa : mesas) {
+                        LinhaTabela linha = new LinhaTabela(cliente, mesa, primeiraLinha);
+                        linhasTabela.add(linha);
+                        
+                        Object[] row = {
+                            primeiraLinha ? cliente.getNome() : "",
+                            primeiraLinha ? cliente.getEndereco() : "",
+                            primeiraLinha ? cliente.getCidade() : "",
+                            mesa.getNumero() != null ? mesa.getNumero() : "---",
+                            mesa.getData() != null ? sdf.format(mesa.getData()) : "---",
+                            mesa.getRegistro() != null ? mesa.getRegistro() : "---",
+                            mesa.getPago() != null ? String.format("%.2f", mesa.getPago()) : "0.00",
+                            mesa.getDeve() != null ? String.format("%.2f", mesa.getDeve()) : "0.00",
+                            "",
+                            cliente.getId(),
+                            mesa.getId()
+                        };
+                        tableModel.addRow(row);
+                        primeiraLinha = false;
+                    }
+                }
+            }
+            System.out.println("Dados carregados com sucesso. Total de linhas: " + linhasTabela.size());
+        } catch (Exception e) {
+            System.err.println("Erro ao carregar dados: " + e.getMessage());
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Erro ao carregar dados: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
     
-    private void salvarEdicaoRegistro(int row, int column) {
-        if (row < registrosFinanceiros.size()) {
-            RegistroFinanceiro registro = registrosFinanceiros.get(row);
-            try {
-                Object valorObj = registrosTableModel.getValueAt(row, column);
-                String valorStr = valorObj != null ? valorObj.toString() : "0";
-                // Remove espaços e substitui vírgula por ponto
-                valorStr = valorStr.trim().replace(",", ".").replace(" ", "");
-                
-                if (valorStr.isEmpty() || valorStr.equals("---")) {
-                    valorStr = "0";
+    private void salvarEdicaoMesa(int row, int column) {
+        if (row < linhasTabela.size()) {
+            LinhaTabela linhaTabela = linhasTabela.get(row);
+            if (linhaTabela.mesa != null) {
+                try {
+                    Object valorObj = tableModel.getValueAt(row, column);
+                    String valorStr = valorObj != null ? valorObj.toString() : "0";
+                    valorStr = valorStr.trim().replace(",", ".").replace(" ", "");
+                    
+                    if (valorStr.isEmpty() || valorStr.equals("---")) {
+                        valorStr = "0";
+                    }
+                    
+                    BigDecimal valor = new BigDecimal(valorStr);
+                    
+                    if (column == 6) {
+                        linhaTabela.mesa.setPago(valor);
+                    } else if (column == 7) {
+                        linhaTabela.mesa.setDeve(valor);
+                    }
+                    
+                    if (controller.atualizarMesa(linhaTabela.mesa)) {
+                        tableModel.setValueAt(String.format("%.2f", valor), row, column);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Erro ao salvar alteração!", "Erro", JOptionPane.ERROR_MESSAGE);
+                        carregarDados();
+                    }
+                } catch (NumberFormatException | ClassCastException e) {
+                    JOptionPane.showMessageDialog(this, "Valor inválido! Use números decimais.", "Erro", JOptionPane.ERROR_MESSAGE);
+                    carregarDados();
                 }
-                
-                BigDecimal valor = new BigDecimal(valorStr);
-                
-                if (column == 3) { // Pago
-                    registro.setPago(valor);
-                } else if (column == 4) { // Deve
-                    registro.setDeve(valor);
-                }
-                
-                if (controller.atualizarRegistroFinanceiro(registro)) {
-                    // Atualiza o valor formatado na tabela
-                    registrosTableModel.setValueAt(String.format("%.2f", valor), row, column);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Erro ao salvar alteração!", "Erro", JOptionPane.ERROR_MESSAGE);
-                    carregarRegistrosFinanceiros(); // Recarrega para reverter
-                }
-            } catch (NumberFormatException | ClassCastException e) {
-                JOptionPane.showMessageDialog(this, "Valor inválido! Use números decimais.", "Erro", JOptionPane.ERROR_MESSAGE);
-                carregarRegistrosFinanceiros(); // Recarrega para reverter
             }
         }
     }
@@ -259,7 +346,6 @@ public class ClientesView extends JPanel {
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(Color.WHITE);
         
-        // Painel principal com padding
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
@@ -303,7 +389,7 @@ public class ClientesView extends JPanel {
         formPanel.add(txtCidade, gbc);
         
         gbc.gridy = 3;
-        PlaceholderTextField txtNumero = new PlaceholderTextField("Número");
+        PlaceholderTextField txtNumero = new PlaceholderTextField("Número da Mesa");
         txtNumero.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         txtNumero.setPreferredSize(new Dimension(0, 40));
         txtNumero.setBorder(BorderFactory.createCompoundBorder(
@@ -334,12 +420,10 @@ public class ClientesView extends JPanel {
         
         mainPanel.add(formPanel, BorderLayout.CENTER);
         
-        // Painel de botões
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 0, 0));
         
-        // Botão Cancelar
         JButton btnCancelar = new JButton("Cancelar");
         btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btnCancelar.setBackground(new Color(232, 236, 240));
@@ -354,7 +438,6 @@ public class ClientesView extends JPanel {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btnCancelar.setBackground(new Color(214, 222, 228));
             }
-            
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 btnCancelar.setBackground(new Color(232, 236, 240));
@@ -362,7 +445,6 @@ public class ClientesView extends JPanel {
         });
         btnCancelar.addActionListener(e -> dialog.dispose());
         
-        // Botão Salvar
         JButton btnSalvar = new JButton("Salvar");
         btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 15));
         btnSalvar.setBackground(new Color(51, 171, 118));
@@ -377,7 +459,6 @@ public class ClientesView extends JPanel {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 btnSalvar.setBackground(new Color(39, 140, 98));
             }
-            
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
                 btnSalvar.setBackground(new Color(51, 171, 118));
@@ -408,10 +489,10 @@ public class ClientesView extends JPanel {
                     return;
                 }
             } else {
-                data = new Date(System.currentTimeMillis()); // Data atual se não informada
+                data = new Date(System.currentTimeMillis());
             }
             
-            if (controller.inserirComRegistro(nome, endereco, cidade, numero, data, registro)) {
+            if (controller.inserirComMesa(nome, endereco, cidade, numero, data, registro)) {
                 JOptionPane.showMessageDialog(dialog, "Cliente adicionado com sucesso!");
                 dialog.dispose();
                 carregarDados();
@@ -427,5 +508,117 @@ public class ClientesView extends JPanel {
         dialog.add(mainPanel, BorderLayout.CENTER);
         dialog.setVisible(true);
     }
+    
+    private void editarCliente(Cliente cliente) {
+        System.out.println("Editando cliente ID: " + cliente.getId() + " - " + cliente.getNome());
+        
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), "Editar Cliente", true);
+        dialog.setSize(400, 300);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+        dialog.getContentPane().setBackground(Color.WHITE);
+        
+        JPanel formPanel = new JPanel(new GridBagLayout());
+        formPanel.setBackground(Color.WHITE);
+        formPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        
+        gbc.gridx = 0; gbc.gridy = 0;
+        formPanel.add(new JLabel("Nome:"), gbc);
+        gbc.gridx = 1;
+        JTextField txtNome = new JTextField(cliente.getNome(), 20);
+        formPanel.add(txtNome, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 1;
+        formPanel.add(new JLabel("Endereço:"), gbc);
+        gbc.gridx = 1;
+        JTextField txtEndereco = new JTextField(cliente.getEndereco(), 20);
+        formPanel.add(txtEndereco, gbc);
+        
+        gbc.gridx = 0; gbc.gridy = 2;
+        formPanel.add(new JLabel("Cidade:"), gbc);
+        gbc.gridx = 1;
+        JTextField txtCidade = new JTextField(cliente.getCidade(), 20);
+        formPanel.add(txtCidade, gbc);
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+        
+        JButton btnSalvar = new JButton("Salvar");
+        btnSalvar.setBackground(new Color(51, 171, 118));
+        btnSalvar.setForeground(Color.WHITE);
+        btnSalvar.setPreferredSize(new Dimension(100, 35));
+        btnSalvar.setBorderPainted(false);
+        btnSalvar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        JButton btnCancelar = new JButton("Cancelar");
+        btnCancelar.setBackground(new Color(232, 236, 240));
+        btnCancelar.setPreferredSize(new Dimension(100, 35));
+        btnCancelar.setBorderPainted(false);
+        btnCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        btnSalvar.addActionListener(e -> {
+            String novoNome = txtNome.getText().trim();
+            String novoEndereco = txtEndereco.getText().trim();
+            String novaCidade = txtCidade.getText().trim();
+            
+            if (novoNome.isEmpty() || novoEndereco.isEmpty() || novaCidade.isEmpty()) {
+                JOptionPane.showMessageDialog(dialog, "Todos os campos são obrigatórios!", "Atenção", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
+            
+            cliente.setNome(novoNome);
+            cliente.setEndereco(novoEndereco);
+            cliente.setCidade(novaCidade);
+            
+            System.out.println("Tentando atualizar cliente: " + cliente.getId());
+            boolean sucesso = controller.atualizar(cliente);
+            System.out.println("Resultado da atualização: " + sucesso);
+            
+            if (sucesso) {
+                JOptionPane.showMessageDialog(dialog, "Cliente atualizado com sucesso!");
+                dialog.dispose();
+                carregarDados();
+            } else {
+                JOptionPane.showMessageDialog(dialog, "Erro ao atualizar cliente!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+        
+        btnCancelar.addActionListener(e -> dialog.dispose());
+        
+        buttonPanel.add(btnCancelar);
+        buttonPanel.add(btnSalvar);
+        
+        dialog.add(formPanel, BorderLayout.CENTER);
+        dialog.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+    
+    private void excluirCliente(Cliente cliente) {
+        System.out.println("Excluindo cliente ID: " + cliente.getId() + " - " + cliente.getNome());
+        
+        int confirm = JOptionPane.showConfirmDialog(this,
+                "Deseja realmente excluir o cliente \"" + cliente.getNome() + "\" e todas as suas mesas?",
+                "Confirmar exclusão", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+        
+        if (confirm == JOptionPane.YES_OPTION) {
+            System.out.println("Usuário confirmou a exclusão");
+            boolean sucesso = controller.deletar(cliente.getId());
+            System.out.println("Resultado da exclusão: " + sucesso);
+            
+            if (sucesso) {
+                JOptionPane.showMessageDialog(this, "Cliente excluído com sucesso!");
+                carregarDados();
+            } else {
+                JOptionPane.showMessageDialog(this, "Erro ao excluir cliente!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            System.out.println("Usuário cancelou a exclusão");
+        }
+    }
 }
-

@@ -1,6 +1,8 @@
--- Script SQL para criar o banco de dados BiDesk
-
 CREATE DATABASE IF NOT EXISTS bidesk_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE USER 'dev'@'%' IDENTIFIED BY 'senha123';
+GRANT ALL PRIVILEGES ON *.* TO 'dev'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
 
 USE bidesk_db;
 
