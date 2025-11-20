@@ -5,12 +5,13 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class DatabaseConnection {
-    private static final String URL = "jdbc:mysql://localhost:3306/bidesk_db?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8";
+    private static final String URL =
+        "jdbc:mysql://localhost:3306/bidesk_db?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8&allowPublicKeyRetrieval=true";
     private static final String USER = "root";
-    private static final String PASSWORD = "mysql123";
-    
+    private static final String PASSWORD = "Rub3ns11992038ks#";
+
     private static Connection connection;
-    
+
     public static Connection getConnection() throws SQLException {
         if (connection == null || connection.isClosed()) {
             try {
@@ -22,7 +23,7 @@ public class DatabaseConnection {
         }
         return connection;
     }
-    
+
     public static void closeConnection() {
         try {
             if (connection != null && !connection.isClosed()) {
@@ -33,5 +34,3 @@ public class DatabaseConnection {
         }
     }
 }
-
-

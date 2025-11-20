@@ -6,9 +6,11 @@ public class Cliente {
     private String endereco;
     private String cidade;
     
+    // Construtor vazio
     public Cliente() {
     }
     
+    // Construtor com parâmetros (FALTAVA ESTE!)
     public Cliente(String nome, String endereco, String cidade) {
         this.nome = nome;
         this.endereco = endereco;
@@ -48,5 +50,3 @@ public class Cliente {
         this.cidade = cidade;
     }
 }
-
-

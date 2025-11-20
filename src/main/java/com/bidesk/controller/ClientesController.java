@@ -1,20 +1,20 @@
 package com.bidesk.controller;
 
 import com.bidesk.dao.ClienteDAO;
-import com.bidesk.dao.RegistroFinanceiroDAO;
+import com.bidesk.dao.MesaDAO;
 import com.bidesk.model.Cliente;
-import com.bidesk.model.RegistroFinanceiro;
+import com.bidesk.model.Mesa;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
 
 public class ClientesController {
     private ClienteDAO clienteDAO;
-    private RegistroFinanceiroDAO registroFinanceiroDAO;
+    private MesaDAO mesaDAO;
     
     public ClientesController() {
-        clienteDAO = new ClienteDAO();
-        registroFinanceiroDAO = new RegistroFinanceiroDAO();
+        this.clienteDAO = new ClienteDAO();
+        this.mesaDAO = new MesaDAO();
     }
     
     public List<Cliente> listarTodos() {
@@ -30,25 +30,37 @@ public class ClientesController {
         return clienteDAO.inserir(cliente);
     }
     
-    public boolean inserirComRegistro(String nome, String endereco, String cidade, String numero, Date data, String registro) {
+    public boolean inserirComMesa(String nome, String endereco, String cidade, String numero, Date data, String registro) {
         Cliente cliente = new Cliente(nome, endereco, cidade);
         int clienteId = clienteDAO.inserirERetornarId(cliente);
         if (clienteId > 0) {
-            RegistroFinanceiro registroFinanceiro = new RegistroFinanceiro(
+            Mesa mesa = new Mesa(
                 clienteId,
-                numero.isEmpty() ? null : numero,
+                numero != null && !numero.isEmpty() ? numero : null,
                 data,
-                registro.isEmpty() ? null : registro,
+                registro != null && !registro.isEmpty() ? registro : null,
                 BigDecimal.ZERO,
                 BigDecimal.ZERO
             );
-            return registroFinanceiroDAO.inserir(registroFinanceiro);
+            return mesaDAO.inserir(mesa);
         }
         return false;
     }
     
-    public boolean atualizarRegistroFinanceiro(RegistroFinanceiro registro) {
-        return registroFinanceiroDAO.atualizar(registro);
+    public boolean adicionarMesa(int clienteId, String numero, Date data, String registro) {
+        Mesa mesa = new Mesa(
+            clienteId,
+            numero != null && !numero.isEmpty() ? numero : null,
+            data,
+            registro != null && !registro.isEmpty() ? registro : null,
+            BigDecimal.ZERO,
+            BigDecimal.ZERO
+        );
+        return mesaDAO.inserir(mesa);
+    }
+    
+    public boolean atualizarMesa(Mesa mesa) {
+        return mesaDAO.atualizar(mesa);
     }
     
     public boolean atualizar(Cliente cliente) {
@@ -56,12 +68,21 @@ public class ClientesController {
     }
     
     public boolean deletar(int id) {
+        // Primeiro deleta todas as mesas do cliente
+        mesaDAO.deletarPorCliente(id);
+        // Depois deleta o cliente
         return clienteDAO.deletar(id);
     }
     
-    public List<RegistroFinanceiro> listarRegistrosPorCliente(int clienteId) {
-        return registroFinanceiroDAO.listarPorCliente(clienteId);
+    public boolean deletarMesa(int mesaId) {
+        return mesaDAO.deletar(mesaId);
+    }
+    
+    public List<Mesa> listarMesasPorCliente(int clienteId) {
+        return mesaDAO.listarPorCliente(clienteId);
+    }
+    
+    public List<Mesa> listarTodasMesas() {
+        return mesaDAO.listarTodas();
     }
 }
-
-
