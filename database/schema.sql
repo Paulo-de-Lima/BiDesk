@@ -1,8 +1,10 @@
--- Script SQL para criar o banco de dados BiDesk
+CREATE DATABASE IF NOT EXISTS bidesk_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-CREATE DATABASE IF NOT EXISTS bidesk CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'dev'@'%' IDENTIFIED BY 'senha123';
+GRANT ALL PRIVILEGES ON *.* TO 'dev'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
 
-USE bidesk;
+USE bidesk_db;
 
 -- Tabela de Materiais (Estoque)
 CREATE TABLE IF NOT EXISTS materiais (
@@ -87,5 +89,3 @@ INSERT INTO despesas (data, cidade, despesa, total) VALUES
 INSERT INTO manutencoes (cliente_id, titulo, descricao) VALUES
 (1, 'Jogo de bolas com defeito', 'Bola 6 e 9 quebradas'),
 (2, 'Pano rasgado', 'Pano rasgado e velho');
-
-
