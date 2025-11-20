@@ -8,6 +8,8 @@ import java.util.List;
 
 public class MaterialDAO {
     
+    private static final String UNIDADE_PADRAO = "UN";
+    
     public List<Material> listarTodos() {
         List<Material> materiais = new ArrayList<>();
         String sql = "SELECT id, nome, quantidade, status FROM materiais ORDER BY nome";
@@ -38,15 +40,16 @@ public class MaterialDAO {
     }
     
     public boolean inserir(Material material) throws SQLException {
-        String sql = "INSERT INTO materiais (nome, quantidade, status) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO materiais (nome, unidade, quantidade, status) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             material.atualizarStatus();
             stmt.setString(1, material.getNome());
-            stmt.setInt(2, material.getQuantidade());
-            stmt.setString(3, material.getStatus().name());
+            stmt.setString(2, UNIDADE_PADRAO);
+            stmt.setInt(3, material.getQuantidade());
+            stmt.setString(4, material.getStatus().name());
             
             int rowsAffected = stmt.executeUpdate();
             return rowsAffected > 0;
@@ -54,7 +57,7 @@ public class MaterialDAO {
     }
     
     public boolean atualizar(Material material) {
-        // CORRIGIDO: 4 placeholders na query (nome, quantidade, status, id)
+        // Atualiza nome, quantidade e status (unidade permanece fixa)
         String sql = "UPDATE materiais SET nome = ?, quantidade = ?, status = ? WHERE id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
