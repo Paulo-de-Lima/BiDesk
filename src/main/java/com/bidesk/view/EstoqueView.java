@@ -10,8 +10,8 @@ import javax.swing.AbstractCellEditor;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-
-// IMPORTANTE: Você precisa da classe auxiliar PlaceholderTextField para esta View compilar.
+import java.awt.geom.RoundRectangle2D;
+import java.util.EventObject;
 
 public class EstoqueView extends JPanel {
     private JTable table;
@@ -19,110 +19,197 @@ public class EstoqueView extends JPanel {
     private EstoqueController controller;
     private java.util.List<Material> materiaisList;
 
+    // Constantes de Cores
+    private static final Color PRIMARY_GREEN = new Color(39, 174, 96);
+    private static final Color PRIMARY_BLUE = new Color(41, 128, 185);
+    private static final Color HOVER_BLUE = new Color(52, 152, 219);
+    private static final Color DANGER_RED = new Color(231, 76, 60);
+    private static final Color WARNING_ORANGE = new Color(243, 156, 18);
+    private static final Color INFO_BLUE = new Color(52, 152, 219);
+    private static final Color LIGHT_GREY = new Color(236, 240, 241);
+
     public EstoqueView() {
         controller = new EstoqueController();
         materiaisList = new java.util.ArrayList<>();
         initializeComponents();
-        setupLayout();
-        carregarDados(); 
+        carregarDados();
     }
+
+    // --- Componentes Auxiliares de Estilo ---
+
+    private class RoundedPanel extends JPanel {
+        private int cornerRadius = 15;
+        private Color backgroundColor = Color.WHITE;
+
+        public RoundedPanel(LayoutManager layout, Color bgColor, int radius) {
+            super(layout);
+            this.backgroundColor = bgColor;
+            this.cornerRadius = radius;
+            setOpaque(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setColor(backgroundColor);
+            g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), cornerRadius, cornerRadius));
+            g2.dispose();
+        }
+    }
+
+    /**
+     * Botão arredondado com sombreamento
+     */
+    private class RoundedButton extends JButton {
+        private Color shadowColor = new Color(0, 0, 0, 30);
+        private int shadowGap = 4;
+        private int cornerRadius = 12;
+
+        public RoundedButton(String text) {
+            super(text);
+            setContentAreaFilled(false);
+            setFocusPainted(false);
+            setBorderPainted(false);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+            // Desenha sombra
+            g2.setColor(shadowColor);
+            g2.fill(new RoundRectangle2D.Float(shadowGap, shadowGap, 
+                getWidth() - shadowGap, getHeight() - shadowGap, 
+                cornerRadius, cornerRadius));
+
+            // Desenha botão
+            g2.setColor(getBackground());
+            g2.fill(new RoundRectangle2D.Float(0, 0, 
+                getWidth() - shadowGap, getHeight() - shadowGap, 
+                cornerRadius, cornerRadius));
+
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    }
+
+    private static class TableActionButton extends JLabel {
+        private Color baseColor;
+        private Color hoverColor;
+
+        public TableActionButton(String text, Color color) {
+            super(text);
+            this.baseColor = color;
+            this.hoverColor = color.brighter();
+            
+            setFont(new Font("Segoe UI", Font.BOLD, 14));
+            setForeground(baseColor);
+            setCursor(new Cursor(Cursor.HAND_CURSOR));
+            
+            addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseEntered(MouseEvent e) {
+                    setForeground(hoverColor);
+                    setToolTipText(getToolTipText());
+                }
+
+                @Override
+                public void mouseExited(MouseEvent e) {
+                    setForeground(baseColor);
+                }
+            });
+        }
+    }
+
+    // --- Inicialização e Layout ---
 
     private void initializeComponents() {
         setLayout(new BorderLayout());
         setBackground(Color.WHITE);
 
-        JPanel contentPanel = new JPanel(new BorderLayout());
-        contentPanel.setBackground(Color.WHITE);
+        // Painel do cabeçalho com fundo verde
+        JPanel headerPanel = new JPanel();
+        headerPanel.setLayout(new BoxLayout(headerPanel, BoxLayout.Y_AXIS));
+        headerPanel.setBackground(PRIMARY_GREEN);
+        headerPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 15, 20));
 
-        // Título
+        // Título com fundo verde
         JLabel titleLabel = new JLabel("Estoque");
-        titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
-        titleLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
+        titleLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
+        titleLabel.setForeground(Color.WHITE);
+        titleLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
+
+        headerPanel.add(titleLabel);
 
         // Tabela
-        String[] columns = { "Materiais", "Quantidade" }; 
+        String[] columns = { "Materiais", "Quantidade" };
         tableModel = new DefaultTableModel(columns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                // A Coluna Materiais (0) é editável para ativar o Editor (botões de ação)
-                return column == 0; 
+                return column == 0;
             }
         };
         table = new JTable(tableModel);
-        table.setRowHeight(50);
-        table.getTableHeader().setBackground(new Color(200, 230, 200));
-        table.getTableHeader().setFont(new Font("Arial", Font.BOLD, 14));
-        table.setFont(new Font("Arial", Font.PLAIN, 14));
-
+        table.setRowHeight(45);
+        table.getTableHeader().setBackground(LIGHT_GREY);
+        table.getTableHeader().setForeground(new Color(41, 50, 65));
+        table.getTableHeader().setFont(new Font("Segoe UI", Font.BOLD, 15));
+        table.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        table.setShowGrid(false);
+        table.setIntercellSpacing(new Dimension(0, 1));
+        table.setBackground(Color.WHITE); 
+        table.setSelectionBackground(LIGHT_GREY.brighter());
+        table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, LIGHT_GREY.darker()));
+        
         DefaultTableCellRenderer centerRenderer = (DefaultTableCellRenderer) table.getTableHeader()
                 .getDefaultRenderer();
         centerRenderer.setHorizontalAlignment(JLabel.CENTER);
 
-        // Ajustar largura das colunas
         table.getColumnModel().getColumn(0).setPreferredWidth(500);
         table.getColumnModel().getColumn(1).setPreferredWidth(150);
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setBackground(Color.WHITE);
 
-        JButton btnAdicionar = new JButton("+ Adicionar novo material");
-        btnAdicionar.setBackground(new Color(51, 171, 118));
+        // Botão Principal com sombreamento
+        RoundedButton btnAdicionar = new RoundedButton("+ Adicionar novo material");
+        btnAdicionar.setBackground(PRIMARY_BLUE); 
         btnAdicionar.setForeground(Color.WHITE);
-        btnAdicionar.setFont(new Font("Arial", Font.PLAIN, 14));
-        btnAdicionar.setPreferredSize(new Dimension(0, 50));
-        btnAdicionar.setOpaque(true);
-        btnAdicionar.setBorderPainted(false);
+        btnAdicionar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btnAdicionar.setPreferredSize(new Dimension(0, 55));
         btnAdicionar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnAdicionar.addActionListener(e -> mostrarDialogoAdicionar()); // Chave para o erro resolvido
-
-        // Efeito hover (correto)
+        
         btnAdicionar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnAdicionar.setBackground(new Color(39, 140, 98));
+                btnAdicionar.setBackground(HOVER_BLUE);
             }
 
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnAdicionar.setBackground(new Color(51, 171, 118));
+                btnAdicionar.setBackground(PRIMARY_BLUE);
             }
         });
+        btnAdicionar.addActionListener(e -> mostrarDialogoAdicionar()); 
 
-        // Legenda (correta)
-        JPanel legendPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        legendPanel.setBackground(Color.WHITE);
-        legendPanel.setBorder(BorderFactory.createEmptyBorder(10, 20, 10, 20));
-
-        JLabel legendLabel = new JLabel("Legenda: ");
-        JLabel redLabel = new JLabel("■ Vazio");
-        redLabel.setForeground(Color.RED);
-        JLabel yellowLabel = new JLabel("■ Baixo");
-        yellowLabel.setForeground(new Color(255, 200, 0));
-        JLabel greenLabel = new JLabel("■ Alto");
-        greenLabel.setForeground(new Color(0, 150, 0));
-
-        legendPanel.add(legendLabel);
-        legendPanel.add(redLabel);
-        legendPanel.add(Box.createHorizontalStrut(10));
-        legendPanel.add(yellowLabel);
-        legendPanel.add(Box.createHorizontalStrut(10));
-        legendPanel.add(greenLabel);
-
-        add(titleLabel, BorderLayout.NORTH);
-        add(scrollPane, BorderLayout.CENTER);
-
+        // Painel inferior apenas com o botão
         JPanel bottomPanel = new JPanel(new BorderLayout());
-        bottomPanel.add(legendPanel, BorderLayout.EAST);
-        bottomPanel.add(btnAdicionar, BorderLayout.CENTER);
         bottomPanel.setBackground(Color.WHITE);
+        bottomPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+        bottomPanel.add(btnAdicionar, BorderLayout.CENTER);
 
+        add(headerPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
-        setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20));
     }
-
-    private void setupLayout() {
-        // Layout já configurado em initializeComponents
-    }
+    
+    // --- Métodos de Dados e Configuração de Tabela ---
 
     public void carregarDados() {
         tableModel.setRowCount(0);
@@ -131,12 +218,11 @@ public class EstoqueView extends JPanel {
         for (Material material : materiaisList) {
             Object[] row = {
                     material.getNome(),
-                    material.getQuantidade() 
+                    material.getQuantidade()
             };
             tableModel.addRow(row);
         }
 
-        // Configurar renderer e editor customizados
         table.getColumn("Materiais").setCellRenderer(new MateriaisCellRenderer());
         table.getColumn("Materiais").setCellEditor(new MateriaisCellEditor());
         table.getColumn("Quantidade").setCellRenderer(new StatusColorRenderer());
@@ -145,49 +231,40 @@ public class EstoqueView extends JPanel {
     private Color getStatusColor(Material.StatusMaterial status) {
         switch (status) {
             case VAZIO:
-                return Color.RED;
+                return DANGER_RED;
             case BAIXO:
-                return new Color(255, 200, 0); 
+                return WARNING_ORANGE; 
             case ALTO:
-                return new Color(0, 150, 0); 
+                return PRIMARY_GREEN; 
             default:
-                return Color.BLACK;
+                return Color.DARK_GRAY;
         }
     }
 
-    // Renderer para a coluna Materiais (com ações integradas)
     private class MateriaisCellRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                 boolean hasFocus, int row, int column) {
+            
             JPanel panel = new JPanel(new BorderLayout(10, 0));
             panel.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
-            panel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+            panel.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
 
             if (row < materiaisList.size()) {
-                // Nome do material à esquerda
                 JLabel lblNome = new JLabel(value.toString());
-                lblNome.setFont(new Font("Arial", Font.PLAIN, 14));
+                lblNome.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+                lblNome.setForeground(Color.BLACK);
                 
-                // Painel de ações à direita (apenas para visualização do Render)
-                JPanel acoesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+                JPanel acoesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
                 acoesPanel.setOpaque(false);
 
-                JLabel lblAdicionar = new JLabel("+");
-                lblAdicionar.setFont(new Font("Arial", Font.BOLD, 20));
-                lblAdicionar.setForeground(new Color(0, 150, 0));
-                
-                JLabel lblRemover = new JLabel("-");
-                lblRemover.setFont(new Font("Arial", Font.BOLD, 20));
-                lblRemover.setForeground(new Color(255, 100, 0));
-                
-                JLabel lblEditar = new JLabel("Editar");
-                lblEditar.setFont(new Font("Arial", Font.PLAIN, 14));
-                lblEditar.setForeground(new Color(0, 100, 200));
-                
-                JLabel lblDeletar = new JLabel("Excluir");
-                lblDeletar.setFont(new Font("Arial", Font.PLAIN, 14));
-                lblDeletar.setForeground(Color.RED);
+                JLabel lblAdicionar = new TableActionButton("+", PRIMARY_GREEN);
+                JLabel lblRemover = new TableActionButton("-", WARNING_ORANGE.darker());
+                JLabel lblEditar = new TableActionButton("Editar", INFO_BLUE);
+                JLabel lblDeletar = new TableActionButton("Excluir", DANGER_RED);
+
+                lblAdicionar.setFont(new Font("Segoe UI", Font.BOLD, 20));
+                lblRemover.setFont(new Font("Segoe UI", Font.BOLD, 20));
 
                 acoesPanel.add(lblAdicionar);
                 acoesPanel.add(lblRemover);
@@ -197,21 +274,18 @@ public class EstoqueView extends JPanel {
                 panel.add(lblNome, BorderLayout.WEST);
                 panel.add(acoesPanel, BorderLayout.EAST);
             }
-
             return panel;
         }
     }
 
-    // Editor para a coluna Materiais (com ações clicáveis)
     private class MateriaisCellEditor extends AbstractCellEditor implements TableCellEditor {
         private JPanel panel;
         private Material materialAtual;
-        private int rowAtual;
-
+        
         public MateriaisCellEditor() {
             panel = new JPanel(new BorderLayout(10, 0));
-            panel.setBackground(Color.WHITE);
-            panel.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+            panel.setBackground(LIGHT_GREY.brighter());
+            panel.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
         }
 
         @Override
@@ -221,102 +295,53 @@ public class EstoqueView extends JPanel {
             
             if (row < materiaisList.size()) {
                 materialAtual = materiaisList.get(row);
-                rowAtual = row;
 
-                // Nome do material à esquerda
                 JLabel lblNome = new JLabel(value.toString());
-                lblNome.setFont(new Font("Arial", Font.PLAIN, 14));
+                lblNome.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+                lblNome.setForeground(Color.BLACK);
 
-                // Painel de ações à direita
-                JPanel acoesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
+                JPanel acoesPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 15, 0));
                 acoesPanel.setOpaque(false);
 
-                // Botão Adicionar (+1 direto)
-                JLabel btnAdicionar = new JLabel("+");
-                btnAdicionar.setFont(new Font("Arial", Font.BOLD, 20));
-                btnAdicionar.setForeground(new Color(0, 150, 0));
+                TableActionButton btnAdicionar = new TableActionButton("+", PRIMARY_GREEN);
+                btnAdicionar.setFont(new Font("Segoe UI", Font.BOLD, 20));
                 btnAdicionar.setToolTipText("Adicionar +1");
-                btnAdicionar.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 btnAdicionar.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         fireEditingStopped();
                         adicionarUm(materialAtual);
                     }
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        btnAdicionar.setFont(new Font("Arial", Font.BOLD, 24));
-                    }
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        btnAdicionar.setFont(new Font("Arial", Font.BOLD, 20));
-                    }
                 });
 
-                // Botão Remover (-1 direto)
-                JLabel btnRemover = new JLabel("-");
-                btnRemover.setFont(new Font("Arial", Font.BOLD, 20));
-                btnRemover.setForeground(new Color(255, 100, 0));
+                TableActionButton btnRemover = new TableActionButton("-", WARNING_ORANGE.darker());
+                btnRemover.setFont(new Font("Segoe UI", Font.BOLD, 20));
                 btnRemover.setToolTipText("Remover -1");
-                btnRemover.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 btnRemover.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         fireEditingStopped();
                         removerUm(materialAtual);
                     }
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        btnRemover.setFont(new Font("Arial", Font.BOLD, 24));
-                    }
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        btnRemover.setFont(new Font("Arial", Font.BOLD, 20));
-                    }
                 });
 
-                // Botão Editar (nome e quantidade)
-                JLabel btnEditar = new JLabel("Editar");
-                btnEditar.setFont(new Font("Arial", Font.PLAIN, 14));
-                btnEditar.setForeground(new Color(0, 100, 200));
+                TableActionButton btnEditar = new TableActionButton("Editar", INFO_BLUE);
                 btnEditar.setToolTipText("Editar nome e quantidade");
-                btnEditar.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 btnEditar.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         fireEditingStopped();
-                        // CHAMA O NOVO MÉTODO DE EDIÇÃO DE NOME E QUANTIDADE
                         mostrarDialogoEditarMaterial(materialAtual); 
-                    }
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        btnEditar.setFont(new Font("Arial", Font.BOLD, 14));
-                    }
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        btnEditar.setFont(new Font("Arial", Font.PLAIN, 14));
                     }
                 });
 
-                // Botão Excluir
-                JLabel btnDeletar = new JLabel("Excluir");
-                btnDeletar.setFont(new Font("Arial", Font.PLAIN, 14));
-                btnDeletar.setForeground(Color.RED);
+                TableActionButton btnDeletar = new TableActionButton("Excluir", DANGER_RED);
                 btnDeletar.setToolTipText("Excluir material");
-                btnDeletar.setCursor(new Cursor(Cursor.HAND_CURSOR));
                 btnDeletar.addMouseListener(new MouseAdapter() {
                     @Override
                     public void mouseClicked(MouseEvent e) {
                         fireEditingStopped();
                         deletarMaterial(materialAtual);
-                    }
-                    @Override
-                    public void mouseEntered(MouseEvent e) {
-                        btnDeletar.setFont(new Font("Arial", Font.BOLD, 14));
-                    }
-                    @Override
-                    public void mouseExited(MouseEvent e) {
-                        btnDeletar.setFont(new Font("Arial", Font.PLAIN, 14));
                     }
                 });
 
@@ -328,7 +353,6 @@ public class EstoqueView extends JPanel {
                 panel.add(lblNome, BorderLayout.WEST);
                 panel.add(acoesPanel, BorderLayout.EAST);
             }
-
             return panel;
         }
 
@@ -336,32 +360,36 @@ public class EstoqueView extends JPanel {
         public Object getCellEditorValue() {
             return materialAtual != null ? materialAtual.getNome() : "";
         }
+        
+        @Override
+        public boolean shouldSelectCell(EventObject anEvent) {
+            return false;
+        }
     }
 
-    // Renderer para colorir a coluna de quantidade baseado no status
     private class StatusColorRenderer extends DefaultTableCellRenderer {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                 boolean hasFocus, int row, int column) {
-            Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             
+            Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
             setHorizontalAlignment(JLabel.CENTER);
-
+            setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, LIGHT_GREY)); 
+            
             if (row < materiaisList.size()) {
                 Material material = materiaisList.get(row);
-                Material.StatusMaterial status = material.getStatus();
-                Color statusColor = getStatusColor(status);
+                Color statusColor = getStatusColor(material.getStatus());
                 
                 if (isSelected) {
                     cell.setBackground(table.getSelectionBackground());
-                    cell.setForeground(statusColor.brighter().brighter()); 
+                    cell.setForeground(statusColor.darker());
                 } else {
-                    cell.setBackground(table.getBackground());
+                    cell.setBackground(Color.WHITE);
                     cell.setForeground(statusColor); 
                 }
             } else {
                 cell.setForeground(Color.BLACK); 
-                cell.setBackground(table.getBackground());
+                cell.setBackground(Color.WHITE);
             }
 
             return cell;
@@ -373,17 +401,15 @@ public class EstoqueView extends JPanel {
     private void mostrarDialogoAdicionar() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
                 "Adicionar Material", true);
-        dialog.setSize(600, 400);
+        dialog.setSize(450, 300);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(Color.WHITE);
 
-        // Painel principal com padding
         JPanel mainPanel = new JPanel(new BorderLayout());
         mainPanel.setBackground(Color.WHITE);
         mainPanel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
 
-        // Painel do formulário
         JPanel formPanel = new JPanel(new GridBagLayout());
         formPanel.setBackground(Color.WHITE);
 
@@ -394,16 +420,14 @@ public class EstoqueView extends JPanel {
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.weightx = 1.0;
 
-        // CAMPO NOME (PlaceholderTextField)
-        PlaceholderTextField txtNome = new PlaceholderTextField("Nome");
+        PlaceholderTextField txtNome = new PlaceholderTextField("Nome do Material");
         txtNome.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         txtNome.setPreferredSize(new Dimension(0, 40));
         txtNome.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)));
         formPanel.add(txtNome, gbc);
 
-        // CAMPO QUANTIDADE
         gbc.gridy++;
         JSpinner spinnerQuantidade = new JSpinner(
                 new SpinnerNumberModel(0, 0, Integer.MAX_VALUE, 1));
@@ -414,58 +438,51 @@ public class EstoqueView extends JPanel {
         if (editor instanceof JSpinner.DefaultEditor) {
             JTextField spinnerField = ((JSpinner.DefaultEditor) editor).getTextField();
             spinnerField.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
                     BorderFactory.createEmptyBorder(8, 12, 8, 12)));
         }
 
         formPanel.add(spinnerQuantidade, gbc);
         mainPanel.add(formPanel, BorderLayout.CENTER);
 
-        // BOTÕES
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(30, 0, 0, 0));
 
-        JButton btnCancelar = new JButton("Cancelar");
+        RoundedButton btnCancelar = new RoundedButton("Cancelar");
         btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        btnCancelar.setBackground(new Color(232, 236, 240));
+        btnCancelar.setBackground(LIGHT_GREY);
         btnCancelar.setForeground(new Color(41, 50, 65));
         btnCancelar.setPreferredSize(new Dimension(130, 45));
-        btnCancelar.setBorderPainted(false);
-        btnCancelar.setOpaque(true);
         btnCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnCancelar.setFocusPainted(false);
         btnCancelar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnCancelar.setBackground(new Color(214, 222, 228));
+                btnCancelar.setBackground(LIGHT_GREY.darker());
             }
 
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnCancelar.setBackground(new Color(232, 236, 240));
+                btnCancelar.setBackground(LIGHT_GREY);
             }
         });
         btnCancelar.addActionListener(e -> dialog.dispose());
 
-        JButton btnSalvar = new JButton("Salvar");
+        RoundedButton btnSalvar = new RoundedButton("Salvar");
         btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 15));
-        btnSalvar.setBackground(new Color(51, 171, 118));
+        btnSalvar.setBackground(PRIMARY_BLUE);
         btnSalvar.setForeground(Color.WHITE);
         btnSalvar.setPreferredSize(new Dimension(130, 45));
-        btnSalvar.setBorderPainted(false);
-        btnSalvar.setOpaque(true);
         btnSalvar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        btnSalvar.setFocusPainted(false);
         btnSalvar.addMouseListener(new java.awt.event.MouseAdapter() {
             @Override
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                btnSalvar.setBackground(new Color(39, 140, 98));
+                btnSalvar.setBackground(HOVER_BLUE);
             }
 
             @Override
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                btnSalvar.setBackground(new Color(51, 171, 118));
+                btnSalvar.setBackground(PRIMARY_BLUE);
             }
         });
 
@@ -485,7 +502,7 @@ public class EstoqueView extends JPanel {
             String resultado = controller.inserir(nome, quantidade); 
 
             if (resultado == null || resultado.isEmpty()) {
-                JOptionPane.showMessageDialog(dialog, "Material adicionado com sucesso!");
+                JOptionPane.showMessageDialog(dialog, "Material adicionado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 dialog.dispose();
                 carregarDados(); 
             } else {
@@ -504,10 +521,9 @@ public class EstoqueView extends JPanel {
         dialog.setVisible(true);
     }
 
-    // MÉTODO MODIFICADO: Edita nome e quantidade.
     private void mostrarDialogoEditarMaterial(Material material) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), 
-                                "Editar Material", true);
+                                 "Editar Material", true);
         dialog.setSize(450, 280); 
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
@@ -522,58 +538,85 @@ public class EstoqueView extends JPanel {
         gbc.anchor = GridBagConstraints.WEST;
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // CAMPO NOME
         gbc.gridx = 0;
         gbc.gridy = 0;
         gbc.weightx = 0.2;
-        formPanel.add(new JLabel("Nome:"), gbc);
+        JLabel lblNome = new JLabel("Nome:");
+        lblNome.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        formPanel.add(lblNome, gbc);
         
         gbc.gridx = 1;
         gbc.weightx = 0.8;
         JTextField txtNome = new JTextField(material.getNome(), 20);
         txtNome.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtNome.setPreferredSize(new Dimension(0, 35));
+        txtNome.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)));
         formPanel.add(txtNome, gbc);
 
-        // CAMPO QUANTIDADE
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 0.2;
-        formPanel.add(new JLabel("Quantidade:"), gbc);
+        JLabel lblQuantidade = new JLabel("Quantidade:");
+        lblQuantidade.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        formPanel.add(lblQuantidade, gbc);
         
         gbc.gridx = 1;
         gbc.weightx = 0.8;
         JSpinner spinnerQuantidade = new JSpinner(
             new SpinnerNumberModel(material.getQuantidade(), 0, Integer.MAX_VALUE, 1));
         spinnerQuantidade.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        spinnerQuantidade.setPreferredSize(new Dimension(0, 35));
         
         JComponent editor = spinnerQuantidade.getEditor();
         if (editor instanceof JSpinner.DefaultEditor) {
             JTextField spinnerField = ((JSpinner.DefaultEditor) editor).getTextField();
             spinnerField.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
-                    BorderFactory.createEmptyBorder(2, 5, 2, 5)));
+                    BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
+                    BorderFactory.createEmptyBorder(5, 10, 5, 10)));
         }
         formPanel.add(spinnerQuantidade, gbc);
 
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
         
-        JButton btnSalvar = new JButton("Salvar");
-        btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnSalvar.setBackground(new Color(51, 171, 118));
+        RoundedButton btnSalvar = new RoundedButton("Salvar");
+        btnSalvar.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnSalvar.setBackground(PRIMARY_BLUE);
         btnSalvar.setForeground(Color.WHITE);
-        btnSalvar.setPreferredSize(new Dimension(100, 35));
-        btnSalvar.setBorderPainted(false);
+        btnSalvar.setPreferredSize(new Dimension(110, 40));
         btnSalvar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnSalvar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnSalvar.setBackground(HOVER_BLUE);
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnSalvar.setBackground(PRIMARY_BLUE);
+            }
+        });
         
-        JButton btnCancelar = new JButton("Cancelar");
-        btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnCancelar.setBackground(new Color(232, 236, 240));
+        RoundedButton btnCancelar = new RoundedButton("Cancelar");
+        btnCancelar.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        btnCancelar.setBackground(LIGHT_GREY);
         btnCancelar.setForeground(new Color(41, 50, 65));
-        btnCancelar.setPreferredSize(new Dimension(100, 35));
-        btnCancelar.setBorderPainted(false);
+        btnCancelar.setPreferredSize(new Dimension(110, 40));
         btnCancelar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCancelar.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                btnCancelar.setBackground(LIGHT_GREY.darker());
+            }
+
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                btnCancelar.setBackground(LIGHT_GREY);
+            }
+        });
 
         btnSalvar.addActionListener(e -> {
             String novoNome = txtNome.getText().trim();
@@ -585,12 +628,11 @@ public class EstoqueView extends JPanel {
                 return;
             }
             
-            // Aplica as novas alterações
             material.setNome(novoNome);
             material.setQuantidade(novaQuantidade); 
             
             if (controller.atualizar(material)) {
-                JOptionPane.showMessageDialog(dialog, "Material atualizado com sucesso!");
+                JOptionPane.showMessageDialog(dialog, "Material atualizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 dialog.dispose();
                 carregarDados();
             } else {
@@ -616,7 +658,7 @@ public class EstoqueView extends JPanel {
 
         if (confirm == JOptionPane.YES_OPTION) {
             if (controller.deletar(material.getId())) {
-                JOptionPane.showMessageDialog(this, "Material excluído com sucesso!");
+                JOptionPane.showMessageDialog(this, "Material excluído com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 carregarDados();
             } else {
                 JOptionPane.showMessageDialog(this, "Erro ao excluir material!", "Erro", JOptionPane.ERROR_MESSAGE);
@@ -643,9 +685,6 @@ public class EstoqueView extends JPanel {
                 JOptionPane.showMessageDialog(this, "Erro ao atualizar quantidade!", "Erro",
                         JOptionPane.ERROR_MESSAGE);
             }
-        } else {
-            JOptionPane.showMessageDialog(this, "A quantidade não pode ser negativa!", "Aviso",
-                    JOptionPane.WARNING_MESSAGE);
         }
     }
 }
