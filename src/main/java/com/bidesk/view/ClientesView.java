@@ -6,7 +6,10 @@ import com.bidesk.model.Mesa;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.AbstractCellEditor;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.text.ParseException;
@@ -15,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.EventObject;
 
 public class ClientesView extends JPanel {
     private JTable tabelaMesclada;
@@ -227,18 +231,21 @@ public class ClientesView extends JPanel {
                     btnEditar.setForeground(new Color(0, 100, 200));
                     btnEditar.setToolTipText("Editar cliente");
                     btnEditar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                    btnEditar.addMouseListener(new java.awt.event.MouseAdapter() {
+                    btnEditar.addMouseListener(new MouseAdapter() {
                         @Override
-                        public void mouseClicked(java.awt.event.MouseEvent e) {
-                            fireEditingStopped();
-                            editarCliente(clienteAtual);
+                        public void mouseClicked(MouseEvent e) {
+                            e.consume();
+                            SwingUtilities.invokeLater(() -> {
+                                fireEditingStopped();
+                                editarCliente(clienteAtual);
+                            });
                         }
                         @Override
-                        public void mouseEntered(java.awt.event.MouseEvent e) {
+                        public void mouseEntered(MouseEvent e) {
                             btnEditar.setFont(new Font("Arial", Font.BOLD, 12));
                         }
                         @Override
-                        public void mouseExited(java.awt.event.MouseEvent e) {
+                        public void mouseExited(MouseEvent e) {
                             btnEditar.setFont(new Font("Arial", Font.PLAIN, 12));
                         }
                     });
@@ -249,18 +256,21 @@ public class ClientesView extends JPanel {
                     btnExcluir.setForeground(Color.RED);
                     btnExcluir.setToolTipText("Excluir cliente");
                     btnExcluir.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                    btnExcluir.addMouseListener(new java.awt.event.MouseAdapter() {
+                    btnExcluir.addMouseListener(new MouseAdapter() {
                         @Override
-                        public void mouseClicked(java.awt.event.MouseEvent e) {
-                            fireEditingStopped();
-                            excluirCliente(clienteAtual);
+                        public void mouseClicked(MouseEvent e) {
+                            e.consume();
+                            SwingUtilities.invokeLater(() -> {
+                                fireEditingStopped();
+                                excluirCliente(clienteAtual);
+                            });
                         }
                         @Override
-                        public void mouseEntered(java.awt.event.MouseEvent e) {
+                        public void mouseEntered(MouseEvent e) {
                             btnExcluir.setFont(new Font("Arial", Font.BOLD, 12));
                         }
                         @Override
-                        public void mouseExited(java.awt.event.MouseEvent e) {
+                        public void mouseExited(MouseEvent e) {
                             btnExcluir.setFont(new Font("Arial", Font.PLAIN, 12));
                         }
                     });
@@ -284,6 +294,11 @@ public class ClientesView extends JPanel {
         @Override
         public Object getCellEditorValue() {
             return clienteAtual != null ? clienteAtual.getNome() : "";
+        }
+        
+        @Override
+        public boolean shouldSelectCell(EventObject anEvent) {
+            return false;
         }
     }
     
@@ -370,18 +385,21 @@ public class ClientesView extends JPanel {
                     btnEditar.setForeground(new Color(0, 100, 200));
                     btnEditar.setToolTipText("Editar mesa");
                     btnEditar.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                    btnEditar.addMouseListener(new java.awt.event.MouseAdapter() {
+                    btnEditar.addMouseListener(new MouseAdapter() {
                         @Override
-                        public void mouseClicked(java.awt.event.MouseEvent e) {
-                            fireEditingStopped();
-                            editarMesa(mesaAtual);
+                        public void mouseClicked(MouseEvent e) {
+                            e.consume();
+                            SwingUtilities.invokeLater(() -> {
+                                fireEditingStopped();
+                                editarMesa(mesaAtual);
+                            });
                         }
                         @Override
-                        public void mouseEntered(java.awt.event.MouseEvent e) {
+                        public void mouseEntered(MouseEvent e) {
                             btnEditar.setFont(new Font("Arial", Font.BOLD, 12));
                         }
                         @Override
-                        public void mouseExited(java.awt.event.MouseEvent e) {
+                        public void mouseExited(MouseEvent e) {
                             btnEditar.setFont(new Font("Arial", Font.PLAIN, 12));
                         }
                     });
@@ -392,18 +410,21 @@ public class ClientesView extends JPanel {
                     btnExcluir.setForeground(Color.RED);
                     btnExcluir.setToolTipText("Excluir mesa");
                     btnExcluir.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                    btnExcluir.addMouseListener(new java.awt.event.MouseAdapter() {
+                    btnExcluir.addMouseListener(new MouseAdapter() {
                         @Override
-                        public void mouseClicked(java.awt.event.MouseEvent e) {
-                            fireEditingStopped();
-                            excluirMesa(mesaAtual);
+                        public void mouseClicked(MouseEvent e) {
+                            e.consume();
+                            SwingUtilities.invokeLater(() -> {
+                                fireEditingStopped();
+                                excluirMesa(mesaAtual);
+                            });
                         }
                         @Override
-                        public void mouseEntered(java.awt.event.MouseEvent e) {
+                        public void mouseEntered(MouseEvent e) {
                             btnExcluir.setFont(new Font("Arial", Font.BOLD, 12));
                         }
                         @Override
-                        public void mouseExited(java.awt.event.MouseEvent e) {
+                        public void mouseExited(MouseEvent e) {
                             btnExcluir.setFont(new Font("Arial", Font.PLAIN, 12));
                         }
                     });
@@ -428,6 +449,11 @@ public class ClientesView extends JPanel {
         @Override
         public Object getCellEditorValue() {
             return mesaAtual != null ? (mesaAtual.getNumero() != null ? mesaAtual.getNumero() : "---") : "---";
+        }
+        
+        @Override
+        public boolean shouldSelectCell(EventObject anEvent) {
+            return false;
         }
     }
     
