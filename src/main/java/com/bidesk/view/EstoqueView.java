@@ -402,6 +402,7 @@ public class EstoqueView extends JPanel {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
                 "Adicionar Material", true);
         dialog.setSize(450, 300);
+        dialog.setResizable(false);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(Color.WHITE);
@@ -525,6 +526,7 @@ public class EstoqueView extends JPanel {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), 
                                  "Editar Material", true);
         dialog.setSize(450, 280); 
+        dialog.setResizable(false);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(Color.WHITE);

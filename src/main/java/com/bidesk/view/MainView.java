@@ -8,6 +8,7 @@ import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
+import java.net.URL;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.BorderFactory;
@@ -61,6 +62,22 @@ public class MainView extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
         setMinimumSize(new Dimension(1024, 620));
+
+        try {
+            // Usa o class loader para encontrar o recurso no classpath
+            URL iconURL = getClass().getResource("/images/favicon.png"); 
+            
+            if (iconURL != null) {
+                // Carrega a imagem e a define como ícone da janela (JFrame)
+                Image icon = new ImageIcon(iconURL).getImage();
+                this.setIconImage(icon); // Método do JFrame
+            } else {
+                System.err.println("Atenção: Ícone 'favicon.png' não encontrado. Verifique a pasta src/main/resources.");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Erro ao carregar o ícone da aplicação.");
+        }
 
         cardLayout = new CardLayout();
         cardPanel = new JPanel(cardLayout);

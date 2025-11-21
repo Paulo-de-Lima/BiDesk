@@ -711,7 +711,8 @@ public class ClientesView extends JPanel {
     private void mostrarDialogoAdicionarCliente() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
                 "Adicionar Cliente", true);
-        dialog.setSize(450, 500);
+        dialog.setSize(450, 560);
+        dialog.setResizable(false);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(Color.WHITE);
@@ -881,6 +882,7 @@ public class ClientesView extends JPanel {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
                 "Adicionar Mesa", true);
         dialog.setSize(450, 400);
+        dialog.setResizable(false);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(Color.WHITE);
@@ -1053,6 +1055,7 @@ public class ClientesView extends JPanel {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), 
                                  "Editar Cliente", true);
         dialog.setSize(450, 280); 
+        dialog.setResizable(false);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(Color.WHITE);
@@ -1223,6 +1226,7 @@ public class ClientesView extends JPanel {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), 
                                  "Editar Mesa", true);
         dialog.setSize(450, 380); 
+        dialog.setResizable(false);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
         dialog.getContentPane().setBackground(Color.WHITE);
