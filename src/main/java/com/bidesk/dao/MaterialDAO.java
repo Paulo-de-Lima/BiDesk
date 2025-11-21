@@ -91,4 +91,32 @@ public class MaterialDAO {
             return false;
         }
     }
+    
+    public Material buscarPorId(int id) {
+        String sql = "SELECT id, nome, quantidade, status FROM materiais WHERE id = ?";
+        
+        try (Connection conn = DatabaseConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            
+            if (rs.next()) {
+                Material material = new Material();
+                material.setId(rs.getInt("id"));
+                material.setNome(rs.getString("nome"));
+                material.setQuantidade(rs.getInt("quantidade"));
+                try {
+                    material.setStatus(Material.StatusMaterial.valueOf(rs.getString("status")));
+                } catch (IllegalArgumentException e) {
+                    material.atualizarStatus();
+                }
+                return material;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        return null;
+    }
 }

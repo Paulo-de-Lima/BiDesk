@@ -25,10 +25,16 @@ public class ManutencaoDAO {
                 manutencoes.add(manutencao);
             }
         } catch (SQLException e) {
+            System.err.println("Erro ao listar manutenções: " + e.getMessage());
             e.printStackTrace();
         }
         
         return manutencoes;
+    }
+    
+    public List<Manutencao> listarPendentes() {
+        // Como não há mais distinção, retorna todas as manutenções
+        return listarTodos();
     }
     
     public boolean inserir(Manutencao manutencao) {
@@ -43,10 +49,17 @@ public class ManutencaoDAO {
                 stmt.setNull(1, Types.INTEGER);
             }
             stmt.setString(2, manutencao.getTitulo());
-            stmt.setString(3, manutencao.getDescricao());
+            if (manutencao.getDescricao() != null) {
+                stmt.setString(3, manutencao.getDescricao());
+            } else {
+                stmt.setNull(3, Types.VARCHAR);
+            }
             
-            return stmt.executeUpdate() > 0;
+            int rowsAffected = stmt.executeUpdate();
+            System.err.println("Manutenção inserida - Linhas afetadas: " + rowsAffected);
+            return rowsAffected > 0;
         } catch (SQLException e) {
+            System.err.println("Erro ao inserir manutenção: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -64,11 +77,18 @@ public class ManutencaoDAO {
                 stmt.setNull(1, Types.INTEGER);
             }
             stmt.setString(2, manutencao.getTitulo());
-            stmt.setString(3, manutencao.getDescricao());
+            if (manutencao.getDescricao() != null) {
+                stmt.setString(3, manutencao.getDescricao());
+            } else {
+                stmt.setNull(3, Types.VARCHAR);
+            }
             stmt.setInt(4, manutencao.getId());
             
-            return stmt.executeUpdate() > 0;
+            int rowsAffected = stmt.executeUpdate();
+            System.err.println("Manutenção atualizada - Linhas afetadas: " + rowsAffected);
+            return rowsAffected > 0;
         } catch (SQLException e) {
+            System.err.println("Erro ao atualizar manutenção: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -81,12 +101,13 @@ public class ManutencaoDAO {
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             
             stmt.setInt(1, id);
-            return stmt.executeUpdate() > 0;
+            int rowsAffected = stmt.executeUpdate();
+            System.err.println("Manutenção deletada - Linhas afetadas: " + rowsAffected);
+            return rowsAffected > 0;
         } catch (SQLException e) {
+            System.err.println("Erro ao deletar manutenção: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
 }
-
-

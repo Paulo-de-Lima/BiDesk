@@ -200,6 +200,7 @@ public class ClientesView extends JPanel {
         tabelaClientes.setIntercellSpacing(new Dimension(0, 1));
         tabelaClientes.setBackground(Color.WHITE);
         tabelaClientes.setSelectionBackground(LIGHT_GREY.brighter());
+        tabelaClientes.setSelectionForeground(Color.BLACK);
         tabelaClientes.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, LIGHT_GREY.darker()));
         
         // Centralizar cabeçalhos
@@ -207,11 +208,32 @@ public class ClientesView extends JPanel {
                 .getDefaultRenderer();
         headerRenderer.setHorizontalAlignment(JLabel.CENTER);
         
+        // Renderers customizados para manter texto visível quando selecionado
+        DefaultTableCellRenderer textRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
+                Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                cell.setForeground(Color.BLACK);
+                if (isSelected) {
+                    cell.setBackground(table.getSelectionBackground());
+                } else {
+                    cell.setBackground(Color.WHITE);
+                }
+                return cell;
+            }
+        };
+        
         // Ajustar larguras das colunas
         tabelaClientes.getColumnModel().getColumn(0).setPreferredWidth(200);
         tabelaClientes.getColumnModel().getColumn(1).setPreferredWidth(250);
         tabelaClientes.getColumnModel().getColumn(2).setPreferredWidth(200);
         tabelaClientes.getColumnModel().getColumn(3).setPreferredWidth(150);
+        
+        // Aplicar renderer customizado nas colunas de texto
+        tabelaClientes.getColumnModel().getColumn(0).setCellRenderer(textRenderer);
+        tabelaClientes.getColumnModel().getColumn(1).setCellRenderer(textRenderer);
+        tabelaClientes.getColumnModel().getColumn(2).setCellRenderer(textRenderer);
         
         // Renderer e Editor para coluna de Ações
         tabelaClientes.getColumnModel().getColumn(3).setCellRenderer(new AcoesClienteCellRenderer());
@@ -650,12 +672,30 @@ public class ClientesView extends JPanel {
             grupoTable.setIntercellSpacing(new Dimension(0, 1));
             grupoTable.setBackground(Color.WHITE);
             grupoTable.setSelectionBackground(LIGHT_GREY.brighter());
+            grupoTable.setSelectionForeground(Color.BLACK);
             grupoTable.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, LIGHT_GREY.darker()));
             
             // Centralizar cabeçalhos
             DefaultTableCellRenderer grupoHeaderRenderer = (DefaultTableCellRenderer) grupoTable.getTableHeader()
                     .getDefaultRenderer();
             grupoHeaderRenderer.setHorizontalAlignment(JLabel.CENTER);
+            
+            // Renderer customizado para manter texto visível quando selecionado
+            DefaultTableCellRenderer grupoCenterRenderer = new DefaultTableCellRenderer() {
+                @Override
+                public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                        boolean hasFocus, int row, int column) {
+                    Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                    setHorizontalAlignment(JLabel.CENTER);
+                    cell.setForeground(Color.BLACK);
+                    if (isSelected) {
+                        cell.setBackground(table.getSelectionBackground());
+                    } else {
+                        cell.setBackground(Color.WHITE);
+                    }
+                    return cell;
+                }
+            };
             
             // Ajustar larguras das colunas
             grupoTable.getColumnModel().getColumn(0).setPreferredWidth(80);
@@ -665,9 +705,7 @@ public class ClientesView extends JPanel {
             grupoTable.getColumnModel().getColumn(4).setPreferredWidth(100);
             grupoTable.getColumnModel().getColumn(5).setPreferredWidth(150);
             
-            // Centralizar colunas
-            DefaultTableCellRenderer grupoCenterRenderer = new DefaultTableCellRenderer();
-            grupoCenterRenderer.setHorizontalAlignment(JLabel.CENTER);
+            // Aplicar renderer customizado nas colunas de texto
             grupoTable.getColumnModel().getColumn(0).setCellRenderer(grupoCenterRenderer);
             grupoTable.getColumnModel().getColumn(1).setCellRenderer(grupoCenterRenderer);
             grupoTable.getColumnModel().getColumn(2).setCellRenderer(grupoCenterRenderer);

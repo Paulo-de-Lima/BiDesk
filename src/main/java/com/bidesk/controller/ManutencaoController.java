@@ -20,6 +20,11 @@ public class ManutencaoController {
         return manutencaoDAO.listarTodos();
     }
     
+    public List<Manutencao> listarPendentes() {
+        return manutencaoDAO.listarPendentes();
+    }
+    
+    
     public String getNomeCliente(Integer clienteId) {
         if (clienteId == null) {
             return null;
@@ -60,6 +65,7 @@ public class ManutencaoController {
         return manutencaoDAO.deletar(id);
     }
 }
+
 
 
 
