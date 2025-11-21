@@ -218,6 +218,7 @@ public class FinanceiroView extends JPanel {
                 } else {
                     cell.setBackground(Color.WHITE);
                 }
+                ((JLabel) cell).setHorizontalAlignment(JLabel.CENTER);
                 return cell;
             }
         };

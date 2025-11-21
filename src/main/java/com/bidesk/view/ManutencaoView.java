@@ -159,12 +159,13 @@ public class ManutencaoView extends JPanel {
                 .getDefaultRenderer();
         headerRenderer.setHorizontalAlignment(JLabel.CENTER);
         
-        // Renderers customizados para manter texto visível quando selecionado
+        // Renderers customizados para manter texto visível quando selecionado e centralizado
         DefaultTableCellRenderer textRenderer = new DefaultTableCellRenderer() {
             @Override
             public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                     boolean hasFocus, int row, int column) {
                 Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                setHorizontalAlignment(JLabel.CENTER);
                 cell.setForeground(Color.BLACK);
                 if (isSelected) {
                     cell.setBackground(table.getSelectionBackground());

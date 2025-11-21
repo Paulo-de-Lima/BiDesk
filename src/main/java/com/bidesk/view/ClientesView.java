@@ -220,6 +220,7 @@ public class ClientesView extends JPanel {
                 } else {
                     cell.setBackground(Color.WHITE);
                 }
+                ((JLabel) cell).setHorizontalAlignment(JLabel.CENTER);
                 return cell;
             }
         };
