@@ -206,7 +206,7 @@ public class EstoqueView extends JPanel {
         add(scrollPane, BorderLayout.CENTER);
         add(bottomPanel, BorderLayout.SOUTH);
         
-        setBorder(BorderFactory.createEmptyBorder(0, 20, 20, 20));
+        setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 20));
     }
     
     // --- Métodos de Dados e Configuração de Tabela ---
