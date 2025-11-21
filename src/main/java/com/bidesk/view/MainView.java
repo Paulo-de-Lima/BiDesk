@@ -37,12 +37,14 @@ public class MainView extends JFrame {
     private JPanel cardPanel;
 
     // Views dos módulos
+    private HomeView homeView;
     private EstoqueView estoqueView;
     private ClientesView clientesView;
     private FinanceiroView financeiroView;
     private ManutencaoView manutencaoView;
 
     // Botões do menu
+    private JButton btnHome;
     private JButton btnEstoque;
     private JButton btnClientes;
     private JButton btnFinanceiro;
@@ -84,10 +86,17 @@ public class MainView extends JFrame {
         cardPanel.setOpaque(false);
         cardPanel.setBackground(Color.WHITE);
         // Inicializar views
+        homeView = new HomeView();
         estoqueView = new EstoqueView();
         clientesView = new ClientesView();
         financeiroView = new FinanceiroView();
         manutencaoView = new ManutencaoView();
+        
+        // Configurar callbacks de navegação da HomeView
+        homeView.setOnNavigateToEstoque(() -> showView("ESTOQUE"));
+        homeView.setOnNavigateToClientes(() -> showView("CLIENTES"));
+        homeView.setOnNavigateToFinanceiro(() -> showView("FINANCEIRO"));
+        homeView.setOnNavigateToManutencao(() -> showView("MANUTENCAO"));
     }
 
     private void setupLayout() {
@@ -150,18 +159,21 @@ public class MainView extends JFrame {
         menuPanel.setOpaque(false);
         menuPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
+        btnHome = createMenuButton("Home");
         btnEstoque = createMenuButton("Estoque");
         btnClientes = createMenuButton("Clientes");
         btnFinanceiro = createMenuButton("Financeiro");
         btnManutencao = createMenuButton("Manutenção");
 
+        btnHome.addActionListener(e -> showView("HOME"));
         btnEstoque.addActionListener(e -> showView("ESTOQUE"));
         btnClientes.addActionListener(e -> showView("CLIENTES"));
         btnFinanceiro.addActionListener(e -> showView("FINANCEIRO"));
         btnManutencao.addActionListener(e -> showView("MANUTENCAO"));
 
-        highlightButton(btnEstoque);
+        highlightButton(btnHome);
 
+        menuPanel.add(btnHome);
         menuPanel.add(btnEstoque);
         menuPanel.add(btnClientes);
         menuPanel.add(btnFinanceiro);
@@ -237,6 +249,7 @@ public class MainView extends JFrame {
     }
 
     private void setupContentArea() {
+        cardPanel.add(homeView, "HOME");
         cardPanel.add(estoqueView, "ESTOQUE");
         cardPanel.add(clientesView, "CLIENTES");
         cardPanel.add(financeiroView, "FINANCEIRO");
@@ -244,7 +257,7 @@ public class MainView extends JFrame {
 
         contentArea.add(cardPanel, BorderLayout.CENTER);
 
-        showView("ESTOQUE");
+        showView("HOME");
     }
 
     private void showView(String viewName) {
@@ -252,6 +265,10 @@ public class MainView extends JFrame {
 
         resetButtons();
         switch (viewName) {
+            case "HOME":
+                highlightButton(btnHome);
+                homeView.carregarDados();
+                break;
             case "ESTOQUE":
                 highlightButton(btnEstoque);
                 estoqueView.carregarDados();
@@ -272,11 +289,13 @@ public class MainView extends JFrame {
     }
 
     private void resetButtons() {
+        btnHome.setBackground(BUTTON_BACKGROUND);
         btnEstoque.setBackground(BUTTON_BACKGROUND);
         btnClientes.setBackground(BUTTON_BACKGROUND);
         btnFinanceiro.setBackground(BUTTON_BACKGROUND);
         btnManutencao.setBackground(BUTTON_BACKGROUND);
 
+        btnHome.setForeground(TEXT_PRIMARY);
         btnEstoque.setForeground(TEXT_PRIMARY);
         btnClientes.setForeground(TEXT_PRIMARY);
         btnFinanceiro.setForeground(TEXT_PRIMARY);
