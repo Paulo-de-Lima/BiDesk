@@ -42,6 +42,7 @@ public class HomeView extends JPanel {
     private static final Color PURPLE = new Color(155, 89, 182);
     
     // Componentes
+    private JLabel lblMateriaisEmFaltaNumero;
     private JLabel lblMateriaisAcabandoNumero;
     private JLabel lblTiposMateriaisNumero;
     private JLabel lblClientesDevendoNumero;
@@ -124,14 +125,19 @@ public class HomeView extends JPanel {
         
         JPanel contentPanel = (JPanel) ((BorderLayout) secaoPanel.getLayout()).getLayoutComponent(BorderLayout.CENTER);
         
-        // Card: Materiais acabando
-        JPanel card1 = criarCardInfo("Materiais em falta", lblMateriaisAcabandoNumero = new JLabel("0"), DANGER_RED);
+        // Card: Materiais em falta
+        JPanel card1 = criarCardInfo("Materiais em falta", lblMateriaisEmFaltaNumero = new JLabel("0"), DANGER_RED);
         contentPanel.add(card1);
         contentPanel.add(Box.createVerticalStrut(8));
         
-        // Card: Tipos de materiais
-        JPanel card2 = criarCardInfo("Tipos de materiais", lblTiposMateriaisNumero = new JLabel("0"), INFO_BLUE);
+        // Card: Materiais acabando
+        JPanel card2 = criarCardInfo("Materiais acabando", lblMateriaisAcabandoNumero = new JLabel("0"), WARNING_ORANGE);
         contentPanel.add(card2);
+        contentPanel.add(Box.createVerticalStrut(8));
+        
+        // Card: Tipos de materiais
+        JPanel card3 = criarCardInfo("Tipos de materiais", lblTiposMateriaisNumero = new JLabel("0"), INFO_BLUE);
+        contentPanel.add(card3);
         
         return secaoPanel;
     }
@@ -286,15 +292,21 @@ public class HomeView extends JPanel {
         try {
             List<Material> materiais = estoqueController.listarTodos();
             
+            int materiaisEmFalta = 0;
             int materiaisAcabando = 0;
             Set<String> tiposMateriais = new HashSet<>();
             
             for (Material material : materiais) {
-                if (material.getStatus() == Material.StatusMaterial.VAZIO || 
-                    material.getStatus() == Material.StatusMaterial.BAIXO) {
+                if (material.getStatus() == Material.StatusMaterial.VAZIO) {
+                    materiaisEmFalta++;
+                } else if (material.getStatus() == Material.StatusMaterial.BAIXO) {
                     materiaisAcabando++;
                 }
                 tiposMateriais.add(material.getNome());
+            }
+            
+            if (lblMateriaisEmFaltaNumero != null) {
+                lblMateriaisEmFaltaNumero.setText(String.valueOf(materiaisEmFalta));
             }
             
             if (lblMateriaisAcabandoNumero != null) {
@@ -306,6 +318,9 @@ public class HomeView extends JPanel {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            if (lblMateriaisEmFaltaNumero != null) {
+                lblMateriaisEmFaltaNumero.setText("--");
+            }
             if (lblMateriaisAcabandoNumero != null) {
                 lblMateriaisAcabandoNumero.setText("--");
             }
@@ -316,11 +331,15 @@ public class HomeView extends JPanel {
         try {
             List<Cliente> clientes = clientesController.listarTodos();
             Set<Integer> clientesDevendo = new HashSet<>();
-            int totalMesas = 0;
+            Set<String> mesasUnicas = new HashSet<>();
             
             for (Cliente cliente : clientes) {
                 List<Mesa> mesas = clientesController.listarMesasPorCliente(cliente.getId());
-                totalMesas += mesas.size();
+                // Contar mesas únicas pelo número da mesa
+                for (Mesa mesa : mesas) {
+                    String numeroMesa = mesa.getNumero() != null ? mesa.getNumero() : "Sem número";
+                    mesasUnicas.add(cliente.getId() + "-" + numeroMesa); // Usar clienteId-numero para garantir unicidade
+                }
                 for (Mesa mesa : mesas) {
                     if (mesa.getDeve() != null && mesa.getDeve().compareTo(BigDecimal.ZERO) > 0) {
                         clientesDevendo.add(cliente.getId());
@@ -328,6 +347,8 @@ public class HomeView extends JPanel {
                     }
                 }
             }
+            
+            int totalMesas = mesasUnicas.size();
             
             if (lblClientesDevendoNumero != null) {
                 lblClientesDevendoNumero.setText(String.valueOf(clientesDevendo.size()));

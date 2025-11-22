@@ -633,6 +633,7 @@ public class ClientesView extends JPanel {
         }
         
         // Criar uma tabela para cada número de mesa
+        int indiceMesa = 1;
         for (Map.Entry<String, List<Mesa>> entry : mesasPorNumero.entrySet()) {
             String numeroMesa = entry.getKey();
             List<Mesa> mesasDoNumero = entry.getValue();
@@ -642,15 +643,17 @@ public class ClientesView extends JPanel {
             grupoPanel.setBackground(Color.WHITE);
             grupoPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 20, 0));
             
-            // Título do grupo (número da mesa) com fundo verde
+            // Título do grupo (número sequencial da mesa) com fundo verde
             JPanel tituloPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
             tituloPanel.setBackground(PRIMARY_GREEN);
             tituloPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
             
-            JLabel grupoLabel = new JLabel("Mesa Nº " + numeroMesa);
+            JLabel grupoLabel = new JLabel("Mesa Nº " + indiceMesa);
             grupoLabel.setFont(new Font("Segoe UI", Font.BOLD, 16));
             grupoLabel.setForeground(Color.WHITE);
             tituloPanel.add(grupoLabel);
+            
+            indiceMesa++;
             
             grupoPanel.add(tituloPanel, BorderLayout.NORTH);
             

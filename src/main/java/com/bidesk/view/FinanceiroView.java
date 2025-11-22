@@ -272,7 +272,7 @@ public class FinanceiroView extends JPanel {
         despesasMateriaisLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
         despesasMateriaisPanel.add(despesasMateriaisLabel, BorderLayout.NORTH);
         
-        String[] despesasMateriaisColumns = {"Material", "Gasto", "Total gasto"};
+        String[] despesasMateriaisColumns = {"Material", "Despesa", "Total despesa"};
         despesasMateriaisTableModel = new DefaultTableModel(despesasMateriaisColumns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -758,7 +758,7 @@ public class FinanceiroView extends JPanel {
         formPanel.add(txtTotalDespesa, gbc);
 
         gbc.gridy++;
-        PlaceholderTextField txtTotalGasto = new PlaceholderTextField("Total Gasto");
+        PlaceholderTextField txtTotalGasto = new PlaceholderTextField("Total Adquirido");
         txtTotalGasto.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         txtTotalGasto.setPreferredSize(new Dimension(0, 40));
         txtTotalGasto.setBorder(BorderFactory.createCompoundBorder(
@@ -930,7 +930,7 @@ public class FinanceiroView extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 3;
         gbc.weightx = 0.2;
-        JLabel lblTotalGasto = new JLabel("Total Gasto:");
+        JLabel lblTotalGasto = new JLabel("Total Adquirido:");
         lblTotalGasto.setFont(new Font("Segoe UI", Font.BOLD, 14));
         formPanel.add(lblTotalGasto, gbc);
         
@@ -1069,7 +1069,7 @@ public class FinanceiroView extends JPanel {
         formPanel.add(txtNome, gbc);
 
         gbc.gridy++;
-        PlaceholderTextField txtGasto = new PlaceholderTextField("Gasto");
+        PlaceholderTextField txtGasto = new PlaceholderTextField("Valor");
         txtGasto.setFont(new Font("Segoe UI", Font.PLAIN, 15));
         txtGasto.setPreferredSize(new Dimension(0, 40));
         txtGasto.setBorder(BorderFactory.createCompoundBorder(
@@ -1204,7 +1204,7 @@ public class FinanceiroView extends JPanel {
         gbc.gridx = 0;
         gbc.gridy = 1;
         gbc.weightx = 0.2;
-        JLabel lblGasto = new JLabel("Gasto:");
+        JLabel lblGasto = new JLabel("Valor:");
         lblGasto.setFont(new Font("Segoe UI", Font.BOLD, 14));
         formPanel.add(lblGasto, gbc);
         
