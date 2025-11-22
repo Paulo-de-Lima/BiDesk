@@ -29,6 +29,9 @@ public class ManutencaoView extends JPanel {
     private static final Color DANGER_RED = new Color(231, 76, 60);
     private static final Color INFO_BLUE = new Color(52, 152, 219);
     private static final Color LIGHT_GREY = new Color(236, 240, 241);
+    private static final Color ROW_ALTERNATE_GREEN = new Color(229, 243, 234); // Verde claro para linhas alternadas
+    private static final Color ROW_SELECTED_GREEN = new Color(200, 230, 210); // Verde mais escuro para linha verde selecionada
+    private static final Color ROW_SELECTED_WHITE = new Color(240, 240, 240); // Cinza claro para linha branca selecionada
     
     public ManutencaoView() {
         controller = new ManutencaoController();
@@ -150,7 +153,7 @@ public class ManutencaoView extends JPanel {
         tabelaPendentes.setShowGrid(false);
         tabelaPendentes.setIntercellSpacing(new Dimension(0, 1));
         tabelaPendentes.setBackground(Color.WHITE);
-        tabelaPendentes.setSelectionBackground(LIGHT_GREY.brighter());
+        tabelaPendentes.setSelectionBackground(ROW_SELECTED_GREEN);
         tabelaPendentes.setSelectionForeground(Color.BLACK);
         tabelaPendentes.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, LIGHT_GREY.darker()));
         
@@ -167,10 +170,14 @@ public class ManutencaoView extends JPanel {
                 Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 setHorizontalAlignment(JLabel.CENTER);
                 cell.setForeground(Color.BLACK);
+                // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+                Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+                // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+                Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
                 if (isSelected) {
-                    cell.setBackground(table.getSelectionBackground());
+                    cell.setBackground(selectedColor);
                 } else {
-                    cell.setBackground(Color.WHITE);
+                    cell.setBackground(rowColor);
                 }
                 return cell;
             }
@@ -271,7 +278,11 @@ public class ManutencaoView extends JPanel {
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
                 boolean hasFocus, int row, int column) {
             JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-            panel.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+            // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+            Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+            // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+            Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+            panel.setBackground(isSelected ? selectedColor : rowColor);
             panel.setOpaque(true);
             
             if (row < pendentesList.size()) {
@@ -292,11 +303,16 @@ public class ManutencaoView extends JPanel {
         
         public AcoesPendentesCellEditor() {
             panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-            panel.setBackground(Color.WHITE);
         }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+            Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+            // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+            Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+            panel.setBackground(isSelected ? selectedColor : rowColor);
+            
             panel.removeAll();
             
             if (row < pendentesList.size()) {

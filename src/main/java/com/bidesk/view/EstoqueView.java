@@ -27,6 +27,9 @@ public class EstoqueView extends JPanel {
     private static final Color WARNING_ORANGE = new Color(243, 156, 18);
     private static final Color INFO_BLUE = new Color(52, 152, 219);
     private static final Color LIGHT_GREY = new Color(236, 240, 241);
+    private static final Color ROW_ALTERNATE_GREEN = new Color(229, 243, 234); // Verde claro para linhas alternadas
+    private static final Color ROW_SELECTED_GREEN = new Color(200, 230, 210); // Verde mais escuro para linha verde selecionada
+    private static final Color ROW_SELECTED_WHITE = new Color(240, 240, 240); // Cinza claro para linha branca selecionada
 
     public EstoqueView() {
         controller = new EstoqueController();
@@ -161,7 +164,8 @@ public class EstoqueView extends JPanel {
         table.setShowGrid(false);
         table.setIntercellSpacing(new Dimension(0, 1));
         table.setBackground(Color.WHITE); 
-        table.setSelectionBackground(LIGHT_GREY.brighter());
+        // Não usar setSelectionBackground padrão, vamos controlar nas células individuais
+        table.setSelectionBackground(ROW_SELECTED_GREEN);
         table.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, LIGHT_GREY.darker()));
         
         DefaultTableCellRenderer centerRenderer = (DefaultTableCellRenderer) table.getTableHeader()
@@ -247,7 +251,11 @@ public class EstoqueView extends JPanel {
                 boolean hasFocus, int row, int column) {
             
             JPanel panel = new JPanel(new BorderLayout(10, 0));
-            panel.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+            // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+            Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+            // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+            Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+            panel.setBackground(isSelected ? selectedColor : rowColor);
             panel.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
 
             if (row < materiaisList.size()) {
@@ -259,7 +267,7 @@ public class EstoqueView extends JPanel {
                 acoesPanel.setOpaque(false);
 
                 JLabel lblAdicionar = new TableActionButton("+", PRIMARY_GREEN);
-                JLabel lblRemover = new TableActionButton("-", WARNING_ORANGE.darker());
+                JLabel lblRemover = new TableActionButton("-", DANGER_RED);
                 JLabel lblEditar = new TableActionButton("Editar", INFO_BLUE);
                 JLabel lblDeletar = new TableActionButton("Excluir", DANGER_RED);
 
@@ -284,13 +292,18 @@ public class EstoqueView extends JPanel {
         
         public MateriaisCellEditor() {
             panel = new JPanel(new BorderLayout(10, 0));
-            panel.setBackground(LIGHT_GREY.brighter());
             panel.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
         }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
                 int column) {
+            // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+            Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+            // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+            Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+            panel.setBackground(isSelected ? selectedColor : rowColor);
+            
             panel.removeAll();
             
             if (row < materiaisList.size()) {
@@ -376,20 +389,25 @@ public class EstoqueView extends JPanel {
             setHorizontalAlignment(JLabel.CENTER);
             setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, LIGHT_GREY)); 
             
+            // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+            Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+            // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+            Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+            
             if (row < materiaisList.size()) {
                 Material material = materiaisList.get(row);
                 Color statusColor = getStatusColor(material.getStatus());
                 
                 if (isSelected) {
-                    cell.setBackground(table.getSelectionBackground());
+                    cell.setBackground(selectedColor);
                     cell.setForeground(statusColor.darker());
                 } else {
-                    cell.setBackground(Color.WHITE);
+                    cell.setBackground(rowColor);
                     cell.setForeground(statusColor); 
                 }
             } else {
                 cell.setForeground(Color.BLACK); 
-                cell.setBackground(Color.WHITE);
+                cell.setBackground(isSelected ? selectedColor : rowColor);
             }
 
             return cell;

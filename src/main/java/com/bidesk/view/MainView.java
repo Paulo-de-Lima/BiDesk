@@ -23,13 +23,18 @@ import javax.swing.SwingConstants;
 public class MainView extends JFrame {
     private static final long serialVersionUID = 1L;
 
-    private static final Color SIDEBAR_BACKGROUND = Color.WHITE;
-    private static final Color SIDEBAR_BORDER = Color.WHITE;
-    private static final Color BUTTON_BACKGROUND = Color.WHITE;
-    private static final Color BUTTON_HOVER = new Color(245, 250, 247);
-    private static final Color BUTTON_SELECTED = new Color(229, 243, 234); // Verde claro para item selecionado
-    private static final Color TEXT_PRIMARY = new Color(41, 50, 65);
+    // Cores do protótipo - Sidebar verde escuro
+    private static final Color SIDEBAR_BACKGROUND = new Color(31, 151, 98); // Verde escuro
+    private static final Color SIDEBAR_BORDER = new Color(25, 130, 85); // Verde mais escuro para borda
+    private static final Color BUTTON_BACKGROUND = new Color(31, 151, 98); // Verde escuro
+    private static final Color BUTTON_HOVER = new Color(36, 163, 92); // Verde intermediário no hover
+    private static final Color BUTTON_SELECTED = new Color(39, 174, 96); // Verde mais claro para item selecionado
+    private static final Color TEXT_PRIMARY = Color.WHITE; // Texto branco no sidebar
+    private static final Color TEXT_SELECTED = Color.WHITE; // Texto branco quando selecionado
     private static final Font MENU_FONT = new Font("Segoe UI", Font.BOLD, 15);
+    
+    // Variável para rastrear qual botão está selecionado
+    private JButton selectedButton;
 
     private JPanel sidebar;
     private JPanel contentArea;
@@ -104,7 +109,7 @@ public class MainView extends JFrame {
         sidebar.setPreferredSize(new Dimension(220, 0));
         sidebar.setBackground(SIDEBAR_BACKGROUND);
         sidebar.setLayout(new BorderLayout());
-        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 3, SIDEBAR_BORDER));
+        sidebar.setBorder(BorderFactory.createMatteBorder(0, 0, 0, 0, SIDEBAR_BORDER));
 
         contentArea = new JPanel(new BorderLayout());
         contentArea.setBackground(new Color(51, 171, 118));
@@ -117,7 +122,7 @@ public class MainView extends JFrame {
         JPanel logoPanel = new JPanel(new BorderLayout());
         logoPanel.setPreferredSize(new Dimension(220, 100));
         logoPanel.setOpaque(true);
-        logoPanel.setBackground(new Color(31, 151, 98)); // Fundo verde
+        logoPanel.setBackground(SIDEBAR_BACKGROUND); // Mesmo verde escuro do sidebar
         logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 0, 20, 0));
 
         // Carregar e exibir a logo
@@ -145,9 +150,9 @@ public class MainView extends JFrame {
                 System.err.println("Atenção: Imagem da logo bidesk_logo1.png não encontrada. Usando texto.");
                 JLabel fallbackLabel = new JLabel("bidesk");
                 fallbackLabel.setFont(new Font("Segoe UI", Font.BOLD, 28));
-                fallbackLabel.setForeground(Color.WHITE); // Texto branco sobre fundo verde
-                fallbackLabel.setHorizontalAlignment(SwingConstants.LEFT);
-                fallbackLabel.setBorder(BorderFactory.createEmptyBorder(0, 20, 0, 0));
+                fallbackLabel.setForeground(Color.WHITE); // Texto branco sobre fundo verde escuro
+                fallbackLabel.setHorizontalAlignment(SwingConstants.CENTER);
+                fallbackLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
                 logoPanel.add(fallbackLabel, BorderLayout.CENTER);
             }
         } catch (Exception e) {
@@ -157,7 +162,7 @@ public class MainView extends JFrame {
         JPanel menuPanel = new JPanel();
         menuPanel.setLayout(new BoxLayout(menuPanel, BoxLayout.Y_AXIS));
         menuPanel.setOpaque(false);
-        menuPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(5, 0, 5, 0)); // Pequeno espaçamento vertical
 
         btnHome = createMenuButton("Home");
         btnEstoque = createMenuButton("Estoque");
@@ -171,6 +176,7 @@ public class MainView extends JFrame {
         btnFinanceiro.addActionListener(e -> showView("FINANCEIRO"));
         btnManutencao.addActionListener(e -> showView("MANUTENCAO"));
 
+        selectedButton = btnHome;
         highlightButton(btnHome);
 
         menuPanel.add(btnHome);
@@ -185,24 +191,27 @@ public class MainView extends JFrame {
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
 
         JButton btnSair = new JButton("Sair");
-        btnSair.setBackground(new Color(232, 236, 240));
-        btnSair.setForeground(TEXT_PRIMARY);
-        btnSair.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        btnSair.setBorder(BorderFactory.createEmptyBorder(15, 0, 15, 0));
+        btnSair.setBackground(new Color(232, 236, 240)); // Cinza claro conforme protótipo - mantém cor
+        btnSair.setForeground(new Color(41, 50, 65)); // Texto escuro no botão Sair
+        btnSair.setFont(new Font("Segoe UI", Font.BOLD, 15)); // Mesma fonte dos outros botões
+        btnSair.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0)); // Padding harmônico com outros botões
         btnSair.setBorderPainted(false);
         btnSair.addActionListener(e -> System.exit(0));
         btnSair.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnSair.setFocusPainted(false);
         btnSair.setOpaque(true);
+        btnSair.setPreferredSize(new Dimension(220, 48)); // Mesma altura dos outros botões
+        btnSair.setMaximumSize(new Dimension(220, 48));
+        btnSair.setMinimumSize(new Dimension(220, 48));
         btnSair.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                btnSair.setBackground(new Color(214, 222, 228));
+                btnSair.setBackground(new Color(214, 222, 228)); // Hover mais escuro
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                btnSair.setBackground(new Color(232, 236, 240));
+                btnSair.setBackground(new Color(232, 236, 240)); // Volta ao cinza claro original
             }
         });
 
@@ -219,27 +228,29 @@ public class MainView extends JFrame {
         button.setFont(MENU_FONT);
         button.setBackground(BUTTON_BACKGROUND);
         button.setForeground(TEXT_PRIMARY);
-        button.setHorizontalAlignment(SwingConstants.CENTER); // Texto centralizado
-        button.setBorder(BorderFactory.createEmptyBorder(15, 10, 15, 10));
+        button.setHorizontalAlignment(SwingConstants.CENTER);
+        button.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15)); // Padding mais harmônico
         button.setBorderPainted(false);
         button.setFocusPainted(false);
-        button.setPreferredSize(new Dimension(220, 50));
-        button.setMaximumSize(new Dimension(220, 50));
-        button.setMinimumSize(new Dimension(220, 50));
+        button.setPreferredSize(new Dimension(220, 48)); // Altura ligeiramente menor para mais harmonia
+        button.setMaximumSize(new Dimension(220, 48));
+        button.setMinimumSize(new Dimension(220, 48));
         button.setCursor(new Cursor(Cursor.HAND_CURSOR));
         button.setOpaque(true);
 
         button.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent evt) {
-                if (!button.getBackground().equals(BUTTON_SELECTED)) {
+                // Só aplica hover se não for o botão selecionado
+                if (button != selectedButton) {
                     button.setBackground(BUTTON_HOVER);
                 }
             }
 
             @Override
             public void mouseExited(MouseEvent evt) {
-                if (!button.getBackground().equals(BUTTON_SELECTED)) {
+                // Volta para o background padrão se não for o botão selecionado
+                if (button != selectedButton) {
                     button.setBackground(BUTTON_BACKGROUND);
                 }
             }
@@ -289,6 +300,7 @@ public class MainView extends JFrame {
     }
 
     private void resetButtons() {
+        // Reseta todos os botões para o estado padrão
         btnHome.setBackground(BUTTON_BACKGROUND);
         btnEstoque.setBackground(BUTTON_BACKGROUND);
         btnClientes.setBackground(BUTTON_BACKGROUND);
@@ -300,11 +312,28 @@ public class MainView extends JFrame {
         btnClientes.setForeground(TEXT_PRIMARY);
         btnFinanceiro.setForeground(TEXT_PRIMARY);
         btnManutencao.setForeground(TEXT_PRIMARY);
+        
+        // Remove borda de todos
+        btnHome.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
+        btnEstoque.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
+        btnClientes.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
+        btnFinanceiro.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
+        btnManutencao.setBorder(BorderFactory.createEmptyBorder(12, 15, 12, 15));
     }
 
     private void highlightButton(JButton button) {
+        // Atualiza a referência do botão selecionado
+        selectedButton = button;
+        
+        // Aplica estilo de selecionado
         button.setBackground(BUTTON_SELECTED);
-        button.setForeground(new Color(39, 140, 98)); // Verde mais escuro para texto do item selecionado
+        button.setForeground(TEXT_SELECTED);
+        
+        // Adiciona uma borda esquerda sutil para indicar seleção
+        button.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(255, 255, 255, 180)), // Borda esquerda branca semi-transparente
+            BorderFactory.createEmptyBorder(12, 11, 12, 15) // Padding ajustado
+        ));
     }
 }
 

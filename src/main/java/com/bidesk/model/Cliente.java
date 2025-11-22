@@ -10,7 +10,7 @@ public class Cliente {
     public Cliente() {
     }
     
-    // Construtor com parâmetros (FALTAVA ESTE!)
+    // Construtor com parâmetros
     public Cliente(String nome, String endereco, String cidade) {
         this.nome = nome;
         this.endereco = endereco;

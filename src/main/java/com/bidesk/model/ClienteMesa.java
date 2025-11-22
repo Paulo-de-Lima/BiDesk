@@ -4,11 +4,11 @@ import java.math.BigDecimal;
 import java.sql.Date;
 
 public class ClienteMesa {
-    private int id; // ID do relacionamento (cliente_mesas)
+    private int id;
     private int clienteId;
     private int mesaId;
-    private String identificacaoMesa; // Para exibir no View
-    private String localizacaoMesa;   // Para exibir no View
+    private String identificacaoMesa;
+    private String localizacaoMesa;
     private Date dataInicioAluguel;
     private BigDecimal valorAluguelMensal;
 

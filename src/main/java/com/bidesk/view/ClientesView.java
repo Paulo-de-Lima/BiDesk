@@ -44,6 +44,9 @@ public class ClientesView extends JPanel {
     private static final Color DANGER_RED = new Color(231, 76, 60);
     private static final Color INFO_BLUE = new Color(52, 152, 219);
     private static final Color LIGHT_GREY = new Color(236, 240, 241);
+    private static final Color ROW_ALTERNATE_GREEN = new Color(229, 243, 234); // Verde claro para linhas alternadas
+    private static final Color ROW_SELECTED_GREEN = new Color(200, 230, 210); // Verde mais escuro para linha verde selecionada
+    private static final Color ROW_SELECTED_WHITE = new Color(240, 240, 240); // Cinza claro para linha branca selecionada
     
     public ClientesView() {
         controller = new ClientesController();
@@ -199,7 +202,7 @@ public class ClientesView extends JPanel {
         tabelaClientes.setShowGrid(false);
         tabelaClientes.setIntercellSpacing(new Dimension(0, 1));
         tabelaClientes.setBackground(Color.WHITE);
-        tabelaClientes.setSelectionBackground(LIGHT_GREY.brighter());
+        tabelaClientes.setSelectionBackground(ROW_SELECTED_GREEN);
         tabelaClientes.setSelectionForeground(Color.BLACK);
         tabelaClientes.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, LIGHT_GREY.darker()));
         
@@ -215,10 +218,14 @@ public class ClientesView extends JPanel {
                     boolean hasFocus, int row, int column) {
                 Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                 cell.setForeground(Color.BLACK);
+                // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+                Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+                // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+                Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
                 if (isSelected) {
-                    cell.setBackground(table.getSelectionBackground());
+                    cell.setBackground(selectedColor);
                 } else {
-                    cell.setBackground(Color.WHITE);
+                    cell.setBackground(rowColor);
                 }
                 ((JLabel) cell).setHorizontalAlignment(JLabel.CENTER);
                 return cell;
@@ -385,7 +392,11 @@ public class ClientesView extends JPanel {
                 boolean hasFocus, int row, int column) {
             
             JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
-            panel.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+            // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+            Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+            // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+            Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+            panel.setBackground(isSelected ? selectedColor : rowColor);
             panel.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
 
             if (row < clientesFiltrados.size()) {
@@ -407,13 +418,18 @@ public class ClientesView extends JPanel {
 
         public AcoesClienteCellEditor() {
             panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
-            panel.setBackground(LIGHT_GREY.brighter());
             panel.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
         }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
                 int column) {
+            // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+            Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+            // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+            Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+            panel.setBackground(isSelected ? selectedColor : rowColor);
+            
             panel.removeAll();
             
             if (row < clientesFiltrados.size()) {
@@ -472,7 +488,11 @@ public class ClientesView extends JPanel {
                 boolean hasFocus, int row, int column) {
             
             JPanel panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
-            panel.setBackground(isSelected ? table.getSelectionBackground() : Color.WHITE);
+            // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+            Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+            // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+            Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+            panel.setBackground(isSelected ? selectedColor : rowColor);
             panel.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
 
             TableActionButton lblEditar = new TableActionButton("Editar", INFO_BLUE);
@@ -493,13 +513,18 @@ public class ClientesView extends JPanel {
 
         public AcoesMesaCellEditor() {
             panel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
-            panel.setBackground(LIGHT_GREY.brighter());
             panel.setBorder(BorderFactory.createEmptyBorder(5, 15, 5, 15));
         }
 
         @Override
         public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row,
                 int column) {
+            // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+            Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+            // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+            Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+            panel.setBackground(isSelected ? selectedColor : rowColor);
+            
             panel.removeAll();
             
             if (clienteSelecionado != null && row < mesasList.size()) {
@@ -675,7 +700,7 @@ public class ClientesView extends JPanel {
             grupoTable.setShowGrid(false);
             grupoTable.setIntercellSpacing(new Dimension(0, 1));
             grupoTable.setBackground(Color.WHITE);
-            grupoTable.setSelectionBackground(LIGHT_GREY.brighter());
+            grupoTable.setSelectionBackground(ROW_SELECTED_GREEN);
             grupoTable.setSelectionForeground(Color.BLACK);
             grupoTable.getTableHeader().setBorder(BorderFactory.createMatteBorder(0, 0, 2, 0, LIGHT_GREY.darker()));
             
@@ -692,10 +717,14 @@ public class ClientesView extends JPanel {
                     Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
                     setHorizontalAlignment(JLabel.CENTER);
                     cell.setForeground(Color.BLACK);
+                    // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+                    Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+                    // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+                    Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
                     if (isSelected) {
-                        cell.setBackground(table.getSelectionBackground());
+                        cell.setBackground(selectedColor);
                     } else {
-                        cell.setBackground(Color.WHITE);
+                        cell.setBackground(rowColor);
                     }
                     return cell;
                 }
