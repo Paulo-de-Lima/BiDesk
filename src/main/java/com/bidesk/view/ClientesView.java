@@ -152,36 +152,107 @@ public class ClientesView extends JPanel {
         // Painel do título e pesquisa
         JPanel clientesHeaderPanel = new JPanel(new BorderLayout());
         clientesHeaderPanel.setBackground(Color.WHITE);
-        clientesHeaderPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        clientesHeaderPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         
         JLabel clientesLabel = new JLabel("Clientes");
         clientesLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        clientesLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));
         clientesHeaderPanel.add(clientesLabel, BorderLayout.NORTH);
         
-        // Campo de pesquisa
-        PlaceholderTextField txtPesquisa = new PlaceholderTextField("Pesquisar cliente");
-        txtPesquisa.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtPesquisa.setPreferredSize(new Dimension(0, 35));
-        txtPesquisa.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+        // Painel para campos de pesquisa lado a lado
+        JPanel pesquisaPanel = new JPanel(new GridLayout(1, 2, 10, 0));
+        pesquisaPanel.setBackground(Color.WHITE);
+        pesquisaPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+        
+        // Campo de pesquisa por cliente
+        PlaceholderTextField txtPesquisaCliente = new PlaceholderTextField("Pesquisar por cliente");
+        txtPesquisaCliente.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtPesquisaCliente.setPreferredSize(new Dimension(0, 40));
+        txtPesquisaCliente.setBackground(Color.WHITE);
+        txtPesquisaCliente.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
-        txtPesquisa.addActionListener(e -> filtrarClientes(txtPesquisa.getText()));
-        txtPesquisa.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+        txtPesquisaCliente.addActionListener(e -> filtrarClientes(txtPesquisaCliente.getText()));
+        txtPesquisaCliente.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                filtrarClientes(txtPesquisa.getText());
+                filtrarClientes(txtPesquisaCliente.getText());
             }
             @Override
             public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                filtrarClientes(txtPesquisa.getText());
+                filtrarClientes(txtPesquisaCliente.getText());
             }
             @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                filtrarClientes(txtPesquisa.getText());
+                filtrarClientes(txtPesquisaCliente.getText());
             }
         });
-        clientesHeaderPanel.add(txtPesquisa, BorderLayout.SOUTH);
+        
+        // Adicionar efeito de foco
+        txtPesquisaCliente.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtPesquisaCliente.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(PRIMARY_GREEN, 2),
+                    BorderFactory.createEmptyBorder(9, 14, 9, 14)
+                ));
+            }
+            @Override
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtPesquisaCliente.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
+                ));
+            }
+        });
+        
+        // Campo de pesquisa por cidade
+        PlaceholderTextField txtPesquisaCidade = new PlaceholderTextField("Pesquisar por cidade");
+        txtPesquisaCidade.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtPesquisaCidade.setPreferredSize(new Dimension(0, 40));
+        txtPesquisaCidade.setBackground(Color.WHITE);
+        txtPesquisaCidade.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        txtPesquisaCidade.addActionListener(e -> filtrarPorCidade(txtPesquisaCidade.getText()));
+        txtPesquisaCidade.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                filtrarPorCidade(txtPesquisaCidade.getText());
+            }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                filtrarPorCidade(txtPesquisaCidade.getText());
+            }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                filtrarPorCidade(txtPesquisaCidade.getText());
+            }
+        });
+        
+        // Adicionar efeito de foco
+        txtPesquisaCidade.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtPesquisaCidade.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(PRIMARY_GREEN, 2),
+                    BorderFactory.createEmptyBorder(9, 14, 9, 14)
+                ));
+            }
+            @Override
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtPesquisaCidade.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
+                ));
+            }
+        });
+        
+        pesquisaPanel.add(txtPesquisaCliente);
+        pesquisaPanel.add(txtPesquisaCidade);
+        clientesHeaderPanel.add(pesquisaPanel, BorderLayout.CENTER);
         
         clientesPanel.add(clientesHeaderPanel, BorderLayout.NORTH);
         
@@ -584,8 +655,9 @@ public class ClientesView extends JPanel {
     
     public void carregarDados() {
         clientesList = controller.listarTodos();
-        clientesFiltrados = new ArrayList<>(clientesList);
-        atualizarTabelaClientes();
+        pesquisaClienteAtual = "";
+        pesquisaCidadeAtual = "";
+        aplicarFiltros();
     }
     
     private void atualizarTabelaClientes() {
@@ -602,20 +674,45 @@ public class ClientesView extends JPanel {
         }
     }
     
+    private String pesquisaClienteAtual = "";
+    private String pesquisaCidadeAtual = "";
+    
     private void filtrarClientes(String textoPesquisa) {
-        if (textoPesquisa == null || textoPesquisa.trim().isEmpty()) {
-            clientesFiltrados = new ArrayList<>(clientesList);
-        } else {
-            String pesquisa = textoPesquisa.toLowerCase().trim();
-            clientesFiltrados = new ArrayList<>();
-            for (Cliente cliente : clientesList) {
-                if ((cliente.getNome() != null && cliente.getNome().toLowerCase().contains(pesquisa)) ||
-                    (cliente.getEndereco() != null && cliente.getEndereco().toLowerCase().contains(pesquisa)) ||
-                    (cliente.getCidade() != null && cliente.getCidade().toLowerCase().contains(pesquisa))) {
-                    clientesFiltrados.add(cliente);
-                }
+        pesquisaClienteAtual = textoPesquisa != null ? textoPesquisa.trim() : "";
+        aplicarFiltros();
+    }
+    
+    private void filtrarPorCidade(String textoPesquisa) {
+        pesquisaCidadeAtual = textoPesquisa != null ? textoPesquisa.trim() : "";
+        aplicarFiltros();
+    }
+    
+    private void aplicarFiltros() {
+        clientesFiltrados = new ArrayList<>();
+        
+        for (Cliente cliente : clientesList) {
+            boolean matchCliente = pesquisaClienteAtual.isEmpty();
+            boolean matchCidade = pesquisaCidadeAtual.isEmpty();
+            
+            // Filtro por cliente (nome ou endereço)
+            if (!pesquisaClienteAtual.isEmpty()) {
+                String pesquisa = pesquisaClienteAtual.toLowerCase();
+                matchCliente = (cliente.getNome() != null && cliente.getNome().toLowerCase().contains(pesquisa)) ||
+                              (cliente.getEndereco() != null && cliente.getEndereco().toLowerCase().contains(pesquisa));
+            }
+            
+            // Filtro por cidade
+            if (!pesquisaCidadeAtual.isEmpty()) {
+                String pesquisa = pesquisaCidadeAtual.toLowerCase();
+                matchCidade = cliente.getCidade() != null && cliente.getCidade().toLowerCase().contains(pesquisa);
+            }
+            
+            // Adiciona se ambos os filtros passarem
+            if (matchCliente && matchCidade) {
+                clientesFiltrados.add(cliente);
             }
         }
+        
         atualizarTabelaClientes();
     }
     

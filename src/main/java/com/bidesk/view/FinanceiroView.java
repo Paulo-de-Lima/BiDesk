@@ -31,6 +31,10 @@ public class FinanceiroView extends JPanel {
     private List<Despesa> despesasFiltradas;
     private List<DespesaMaterial> despesasMateriaisList;
     
+    // Variáveis para filtros
+    private String filtroCidadeAtual = "";
+    private String filtroDataAtual = "";
+    
     // Constantes de Cores
     private static final Color PRIMARY_GREEN = new Color(39, 174, 96);
     private static final Color PRIMARY_BLUE = new Color(41, 128, 185);
@@ -144,43 +148,107 @@ public class FinanceiroView extends JPanel {
         
         JPanel cobrancasHeaderPanel = new JPanel(new BorderLayout());
         cobrancasHeaderPanel.setBackground(Color.WHITE);
-        cobrancasHeaderPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        cobrancasHeaderPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 15, 0));
         
         JLabel cobrancasLabel = new JLabel("Histórico de cobranças");
         cobrancasLabel.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        cobrancasLabel.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));
         cobrancasHeaderPanel.add(cobrancasLabel, BorderLayout.NORTH);
         
-        // Painel de filtros e pesquisa
-        JPanel filtrosPanel = new JPanel(new GridLayout(1, 1, 0, 10));
+        // Painel para campos de pesquisa lado a lado
+        JPanel filtrosPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         filtrosPanel.setBackground(Color.WHITE);
+        filtrosPanel.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
         
-        // Filtro por cidade
+        // Campo de pesquisa por cidade
         PlaceholderTextField txtFiltroCidade = new PlaceholderTextField("Pesquisar por cidade");
         txtFiltroCidade.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        txtFiltroCidade.setPreferredSize(new Dimension(0, 35));
+        txtFiltroCidade.setPreferredSize(new Dimension(0, 40));
+        txtFiltroCidade.setBackground(Color.WHITE);
         txtFiltroCidade.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
-            BorderFactory.createEmptyBorder(5, 10, 5, 10)
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
         ));
-        filtrosPanel.add(txtFiltroCidade);
-        
-        // Listeners para filtros
+        txtFiltroCidade.addActionListener(e -> atualizarFiltroCidade(txtFiltroCidade.getText()));
         txtFiltroCidade.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
             @Override
             public void insertUpdate(javax.swing.event.DocumentEvent e) {
-                filtrarCobrancas(txtFiltroCidade.getText());
+                atualizarFiltroCidade(txtFiltroCidade.getText());
             }
             @Override
             public void removeUpdate(javax.swing.event.DocumentEvent e) {
-                filtrarCobrancas(txtFiltroCidade.getText());
+                atualizarFiltroCidade(txtFiltroCidade.getText());
             }
             @Override
             public void changedUpdate(javax.swing.event.DocumentEvent e) {
-                filtrarCobrancas(txtFiltroCidade.getText());
+                atualizarFiltroCidade(txtFiltroCidade.getText());
             }
         });
         
-        cobrancasHeaderPanel.add(filtrosPanel, BorderLayout.SOUTH);
+        // Adicionar efeito de foco
+        txtFiltroCidade.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtFiltroCidade.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(PRIMARY_GREEN, 2),
+                    BorderFactory.createEmptyBorder(9, 14, 9, 14)
+                ));
+            }
+            @Override
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtFiltroCidade.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
+                ));
+            }
+        });
+        
+        // Campo de pesquisa por data
+        PlaceholderTextField txtFiltroData = new PlaceholderTextField("Pesquisar por data (dd/MM/yyyy)");
+        txtFiltroData.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtFiltroData.setPreferredSize(new Dimension(0, 40));
+        txtFiltroData.setBackground(Color.WHITE);
+        txtFiltroData.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(10, 15, 10, 15)
+        ));
+        txtFiltroData.addActionListener(e -> atualizarFiltroData(txtFiltroData.getText()));
+        txtFiltroData.getDocument().addDocumentListener(new javax.swing.event.DocumentListener() {
+            @Override
+            public void insertUpdate(javax.swing.event.DocumentEvent e) {
+                atualizarFiltroData(txtFiltroData.getText());
+            }
+            @Override
+            public void removeUpdate(javax.swing.event.DocumentEvent e) {
+                atualizarFiltroData(txtFiltroData.getText());
+            }
+            @Override
+            public void changedUpdate(javax.swing.event.DocumentEvent e) {
+                atualizarFiltroData(txtFiltroData.getText());
+            }
+        });
+        
+        // Adicionar efeito de foco
+        txtFiltroData.addFocusListener(new java.awt.event.FocusAdapter() {
+            @Override
+            public void focusGained(java.awt.event.FocusEvent evt) {
+                txtFiltroData.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(PRIMARY_GREEN, 2),
+                    BorderFactory.createEmptyBorder(9, 14, 9, 14)
+                ));
+            }
+            @Override
+            public void focusLost(java.awt.event.FocusEvent evt) {
+                txtFiltroData.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                    BorderFactory.createEmptyBorder(10, 15, 10, 15)
+                ));
+            }
+        });
+        
+        filtrosPanel.add(txtFiltroCidade);
+        filtrosPanel.add(txtFiltroData);
+        cobrancasHeaderPanel.add(filtrosPanel, BorderLayout.CENTER);
         cobrancasPanel.add(cobrancasHeaderPanel, BorderLayout.NORTH);
         
         String[] cobrancasColumns = {"Data", "Cidade", "Total Despesa", "Total adquirido", "Ações"};
@@ -406,31 +474,55 @@ public class FinanceiroView extends JPanel {
     
     public void carregarDados() {
         despesasList = controller.listarTodos();
-        despesasFiltradas = new ArrayList<>(despesasList);
-        atualizarTabelaCobrancas();
+        filtroCidadeAtual = "";
+        filtroDataAtual = "";
+        aplicarFiltrosCobrancas();
         carregarDespesasMateriais(); // Carregar todas as despesas materiais
     }
     
-    private void filtrarCobrancas(String filtroCidade) {
+    private void aplicarFiltrosCobrancas() {
         despesasFiltradas.clear();
         
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        
         for (Despesa despesa : despesasList) {
-            boolean match = true;
+            boolean matchCidade = filtroCidadeAtual.isEmpty();
+            boolean matchData = filtroDataAtual.isEmpty();
             
             // Filtro por cidade
-            if (!filtroCidade.isEmpty()) {
+            if (!filtroCidadeAtual.isEmpty()) {
                 String cidade = despesa.getCidade();
-                if (cidade == null || !cidade.toLowerCase().contains(filtroCidade.toLowerCase())) {
-                    match = false;
+                matchCidade = cidade != null && cidade.toLowerCase().contains(filtroCidadeAtual.toLowerCase());
+            }
+            
+            // Filtro por data
+            if (!filtroDataAtual.isEmpty()) {
+                if (despesa.getData() != null) {
+                    String dataFormatada = sdf.format(despesa.getData());
+                    matchData = dataFormatada.contains(filtroDataAtual);
+                } else {
+                    matchData = false;
                 }
             }
             
-            if (match) {
+            // Adiciona se ambos os filtros passarem
+            if (matchCidade && matchData) {
                 despesasFiltradas.add(despesa);
             }
         }
         
         atualizarTabelaCobrancas();
+    }
+    
+    // Métodos para atualizar os filtros (chamados pelos listeners)
+    private void atualizarFiltroCidade(String cidade) {
+        filtroCidadeAtual = cidade != null ? cidade.trim() : "";
+        aplicarFiltrosCobrancas();
+    }
+    
+    private void atualizarFiltroData(String data) {
+        filtroDataAtual = data != null ? data.trim() : "";
+        aplicarFiltrosCobrancas();
     }
     
     private void atualizarTabelaCobrancas() {

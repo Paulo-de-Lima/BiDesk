@@ -192,7 +192,7 @@ public class MainView extends JFrame {
 
         JButton btnSair = new JButton("Sair");
         btnSair.setBackground(new Color(232, 236, 240)); // Cinza claro conforme protótipo - mantém cor
-        btnSair.setForeground(new Color(41, 50, 65)); // Texto escuro no botão Sair
+        btnSair.setForeground(Color.BLACK); // Texto preto no botão Sair
         btnSair.setFont(new Font("Segoe UI", Font.BOLD, 15)); // Mesma fonte dos outros botões
         btnSair.setBorder(BorderFactory.createEmptyBorder(12, 0, 12, 0)); // Padding harmônico com outros botões
         btnSair.setBorderPainted(false);
@@ -206,12 +206,12 @@ public class MainView extends JFrame {
         btnSair.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseEntered(MouseEvent e) {
-                btnSair.setBackground(new Color(214, 222, 228)); // Hover mais escuro
+                btnSair.setForeground(new Color(231, 76, 60)); // Texto vermelho no hover
             }
 
             @Override
             public void mouseExited(MouseEvent e) {
-                btnSair.setBackground(new Color(232, 236, 240)); // Volta ao cinza claro original
+                btnSair.setForeground(Color.BLACK); // Volta ao preto original
             }
         });
 
@@ -329,10 +329,10 @@ public class MainView extends JFrame {
         button.setBackground(BUTTON_SELECTED);
         button.setForeground(TEXT_SELECTED);
         
-        // Adiciona uma borda esquerda sutil para indicar seleção
+        // Adiciona bordas brancas: superior, esquerda e inferior para indicar seleção
         button.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createMatteBorder(0, 4, 0, 0, new Color(255, 255, 255, 180)), // Borda esquerda branca semi-transparente
-            BorderFactory.createEmptyBorder(12, 11, 12, 15) // Padding ajustado
+            BorderFactory.createMatteBorder(2, 4, 2, 0, Color.WHITE), // Borda superior, esquerda e inferior brancas
+            BorderFactory.createEmptyBorder(10, 11, 10, 15) // Padding interno ajustado para compensar as bordas
         ));
     }
 }

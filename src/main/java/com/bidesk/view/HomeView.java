@@ -191,7 +191,7 @@ public class HomeView extends JPanel {
     }
     
     private JPanel criarSecaoManutencao() {
-        JPanel secaoPanel = criarSecaoBase("Manutenção", WARNING_ORANGE, () -> {
+        JPanel secaoPanel = criarSecaoBase("Manutenção", DANGER_RED, () -> {
             if (onNavigateToManutencao != null) onNavigateToManutencao.run();
         });
         
