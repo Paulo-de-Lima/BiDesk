@@ -22,6 +22,7 @@ public class ClienteDAO {
                 cliente.setNome(rs.getString("nome"));
                 cliente.setEndereco(rs.getString("endereco"));
                 cliente.setCidade(rs.getString("cidade"));
+                cliente.setTelefone(rs.getString("telefone"));
                 clientes.add(cliente);
             }
         } catch (SQLException e) {
@@ -32,7 +33,7 @@ public class ClienteDAO {
     }
     
     public boolean inserir(Cliente cliente) {
-        String sql = "INSERT INTO clientes (nome, endereco, cidade) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO clientes (nome, endereco, cidade, telefone) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -40,6 +41,7 @@ public class ClienteDAO {
             stmt.setString(1, cliente.getNome());
             stmt.setString(2, cliente.getEndereco());
             stmt.setString(3, cliente.getCidade());
+            stmt.setString(4, cliente.getTelefone());
             
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -49,7 +51,7 @@ public class ClienteDAO {
     }
     
     public int inserirERetornarId(Cliente cliente) {
-        String sql = "INSERT INTO clientes (nome, endereco, cidade) VALUES (?, ?, ?)";
+        String sql = "INSERT INTO clientes (nome, endereco, cidade, telefone) VALUES (?, ?, ?, ?)";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
@@ -57,6 +59,7 @@ public class ClienteDAO {
             stmt.setString(1, cliente.getNome());
             stmt.setString(2, cliente.getEndereco());
             stmt.setString(3, cliente.getCidade());
+            stmt.setString(4, cliente.getTelefone());
             
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
@@ -73,7 +76,7 @@ public class ClienteDAO {
     }
     
     public boolean atualizar(Cliente cliente) {
-        String sql = "UPDATE clientes SET nome = ?, endereco = ?, cidade = ? WHERE id = ?";
+        String sql = "UPDATE clientes SET nome = ?, endereco = ?, cidade = ?, telefone = ? WHERE id = ?";
         
         try (Connection conn = DatabaseConnection.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -81,7 +84,8 @@ public class ClienteDAO {
             stmt.setString(1, cliente.getNome());
             stmt.setString(2, cliente.getEndereco());
             stmt.setString(3, cliente.getCidade());
-            stmt.setInt(4, cliente.getId());
+            stmt.setString(4, cliente.getTelefone());
+            stmt.setInt(5, cliente.getId());
             
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
@@ -119,6 +123,7 @@ public class ClienteDAO {
                 cliente.setNome(rs.getString("nome"));
                 cliente.setEndereco(rs.getString("endereco"));
                 cliente.setCidade(rs.getString("cidade"));
+                cliente.setTelefone(rs.getString("telefone"));
                 return cliente;
             }
         } catch (SQLException e) {
@@ -143,6 +148,7 @@ public class ClienteDAO {
                 cliente.setNome(rs.getString("nome"));
                 cliente.setEndereco(rs.getString("endereco"));
                 cliente.setCidade(rs.getString("cidade"));
+                cliente.setTelefone(rs.getString("telefone"));
                 return cliente;
             }
         } catch (SQLException e) {

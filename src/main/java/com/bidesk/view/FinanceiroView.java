@@ -337,6 +337,27 @@ public class FinanceiroView extends JPanel {
         tabelaCobrancas.getColumnModel().getColumn(4).setCellRenderer(new AcoesCobrancaCellRenderer());
         tabelaCobrancas.getColumnModel().getColumn(4).setCellEditor(new AcoesCobrancaCellEditor());
         
+        // Listener para exibir conteúdo completo ao clicar em células
+        tabelaCobrancas.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = tabelaCobrancas.rowAtPoint(e.getPoint());
+                int col = tabelaCobrancas.columnAtPoint(e.getPoint());
+                
+                if (row >= 0 && row < tabelaCobrancas.getRowCount() && col >= 0 && col < tabelaCobrancas.getColumnCount()) {
+                    // Exibir conteúdo completo ao clicar em qualquer célula (exceto ações)
+                    if (col != 4) { // Não mostrar para coluna de ações
+                        Object value = tabelaCobrancas.getValueAt(row, col);
+                        if (value != null) {
+                            String texto = value.toString();
+                            String nomeColuna = tabelaCobrancas.getColumnName(col);
+                            mostrarConteudoCompleto(nomeColuna, texto);
+                        }
+                    }
+                }
+            }
+        });
+        
         JScrollPane cobrancasScrollPane = new JScrollPane(tabelaCobrancas);
         cobrancasScrollPane.setBorder(BorderFactory.createEmptyBorder());
         cobrancasScrollPane.setBackground(Color.WHITE);
@@ -410,6 +431,27 @@ public class FinanceiroView extends JPanel {
         // Aplicar renderer monetário nas outras colunas
         tabelaDespesasMateriais.getColumnModel().getColumn(1).setCellRenderer(despesasMoneyRenderer);
         tabelaDespesasMateriais.getColumnModel().getColumn(2).setCellRenderer(despesasMoneyRenderer);
+        
+        // Listener para exibir conteúdo completo ao clicar em células (exceto coluna de ações)
+        tabelaDespesasMateriais.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = tabelaDespesasMateriais.rowAtPoint(e.getPoint());
+                int col = tabelaDespesasMateriais.columnAtPoint(e.getPoint());
+                
+                if (row >= 0 && row < tabelaDespesasMateriais.getRowCount() && col >= 0 && col < tabelaDespesasMateriais.getColumnCount()) {
+                    // Exibir conteúdo completo ao clicar em qualquer célula (exceto ações na coluna 0)
+                    if (col != 0 || row < 0) { // Coluna 0 tem ações, mas podemos mostrar conteúdo se não for ação
+                        Object value = tabelaDespesasMateriais.getValueAt(row, col);
+                        if (value != null) {
+                            String texto = value.toString();
+                            String nomeColuna = tabelaDespesasMateriais.getColumnName(col);
+                            mostrarConteudoCompleto(nomeColuna, texto);
+                        }
+                    }
+                }
+            }
+        });
         
         JScrollPane despesasMateriaisScrollPane = new JScrollPane(tabelaDespesasMateriais);
         despesasMateriaisScrollPane.setBorder(BorderFactory.createEmptyBorder());
@@ -1424,6 +1466,101 @@ public class FinanceiroView extends JPanel {
 
         dialog.add(formPanel, BorderLayout.CENTER);
         dialog.add(buttonPanel, BorderLayout.SOUTH);
+        dialog.setVisible(true);
+    }
+    
+    // Método utilitário para exibir conteúdo completo de células
+    private void mostrarConteudoCompleto(String nomeColuna, String conteudo) {
+        if (conteudo == null || conteudo.trim().isEmpty()) {
+            return;
+        }
+        
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
+                "Conteúdo Completo - " + nomeColuna, true);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+        dialog.getContentPane().setBackground(Color.WHITE);
+        
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JLabel labelTitulo = new JLabel(nomeColuna + ":");
+        labelTitulo.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        labelTitulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        mainPanel.add(labelTitulo, BorderLayout.NORTH);
+        
+        JTextArea textArea = new JTextArea(conteudo);
+        textArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        textArea.setWrapStyleWord(true);
+        textArea.setLineWrap(true);
+        textArea.setEditable(false);
+        textArea.setBackground(Color.WHITE);
+        textArea.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        
+        // Calcular tamanho necessário baseado no conteúdo
+        FontMetrics fm = textArea.getFontMetrics(textArea.getFont());
+        int lineHeight = fm.getHeight();
+        
+        // Estimar número de linhas baseado no comprimento do texto
+        int estimatedLines = 1;
+        int baseWidth = 500; // Largura base para cálculo
+        String[] palavras = conteudo.split("\\s+");
+        int currentLineWidth = 0;
+        for (String palavra : palavras) {
+            int palavraWidth = fm.stringWidth(palavra + " ");
+            if (currentLineWidth + palavraWidth > baseWidth) {
+                estimatedLines++;
+                currentLineWidth = palavraWidth;
+            } else {
+                currentLineWidth += palavraWidth;
+            }
+        }
+        
+        // Calcular largura necessária (máximo de 700px, mínimo de 500px)
+        int textWidth = fm.stringWidth(conteudo);
+        int preferredWidth = Math.min(700, Math.max(500, textWidth + 120));
+        
+        // Calcular altura necessária (máximo de 500px, mínimo de 250px)
+        int preferredHeight = Math.min(500, Math.max(250, (estimatedLines * lineHeight) + 140));
+        
+        textArea.setPreferredSize(new Dimension(preferredWidth - 80, preferredHeight - 120));
+        
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setPreferredSize(new Dimension(preferredWidth - 80, preferredHeight - 120));
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+        
+        RoundedButton btnFechar = new RoundedButton("Fechar");
+        btnFechar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnFechar.setBackground(PRIMARY_BLUE);
+        btnFechar.setForeground(Color.WHITE);
+        btnFechar.setPreferredSize(new Dimension(100, 35));
+        btnFechar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnFechar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent evt) {
+                btnFechar.setBackground(HOVER_BLUE);
+            }
+            @Override
+            public void mouseExited(MouseEvent evt) {
+                btnFechar.setBackground(PRIMARY_BLUE);
+            }
+        });
+        btnFechar.addActionListener(e -> dialog.dispose());
+        
+        buttonPanel.add(btnFechar);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        dialog.add(mainPanel);
+        dialog.pack();
+        dialog.setSize(preferredWidth, preferredHeight);
         dialog.setVisible(true);
     }
 }

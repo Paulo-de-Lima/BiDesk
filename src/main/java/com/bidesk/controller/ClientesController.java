@@ -30,8 +30,34 @@ public class ClientesController {
         return clienteDAO.inserir(cliente);
     }
     
+    // Adicionar novo método com telefone
+    public boolean inserir(String nome, String endereco, String cidade, String telefone) {
+        Cliente cliente = new Cliente(nome, endereco, cidade);
+        cliente.setTelefone(telefone);
+        return clienteDAO.inserir(cliente);
+    }
+    
     public boolean inserirComMesa(String nome, String endereco, String cidade, String numero, Date data, String registro) {
         Cliente cliente = new Cliente(nome, endereco, cidade);
+        int clienteId = clienteDAO.inserirERetornarId(cliente);
+        if (clienteId > 0) {
+            Mesa mesa = new Mesa(
+                clienteId,
+                numero != null && !numero.isEmpty() ? numero : null,
+                data,
+                registro != null && !registro.isEmpty() ? registro : null,
+                BigDecimal.ZERO,
+                BigDecimal.ZERO
+            );
+            return mesaDAO.inserir(mesa);
+        }
+        return false;
+    }
+    
+    // Adicionar sobrecarga com telefone
+    public boolean inserirComMesa(String nome, String endereco, String cidade, String telefone, String numero, Date data, String registro) {
+        Cliente cliente = new Cliente(nome, endereco, cidade);
+        cliente.setTelefone(telefone);
         int clienteId = clienteDAO.inserirERetornarId(cliente);
         if (clienteId > 0) {
             Mesa mesa = new Mesa(

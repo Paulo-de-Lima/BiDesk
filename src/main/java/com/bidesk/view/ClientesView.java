@@ -22,7 +22,6 @@ import java.util.Map;
 import java.util.EventObject;
 
 public class ClientesView extends JPanel {
-    // Tabelas
     private JTable tabelaClientes;
     private DefaultTableModel clientesTableModel;
     
@@ -256,11 +255,11 @@ public class ClientesView extends JPanel {
         
         clientesPanel.add(clientesHeaderPanel, BorderLayout.NORTH);
         
-        String[] clientesColumns = {"Nome", "Endereço", "Cidade", "Ações"};
+        String[] clientesColumns = {"Nome", "Endereço", "Cidade", "Telefone", "Ações"};
         clientesTableModel = new DefaultTableModel(clientesColumns, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 3; // Apenas coluna de ações é editável
+                return column == 4; // Mudar de 3 para 4 (coluna de ações agora é 4)
             }
         };
         
@@ -281,6 +280,50 @@ public class ClientesView extends JPanel {
         DefaultTableCellRenderer headerRenderer = (DefaultTableCellRenderer) tabelaClientes.getTableHeader()
                 .getDefaultRenderer();
         headerRenderer.setHorizontalAlignment(JLabel.CENTER);
+        
+        // Renderer especial para coluna Nome que ajusta fonte para não quebrar
+        DefaultTableCellRenderer nomeRenderer = new DefaultTableCellRenderer() {
+            @Override
+            public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected,
+                    boolean hasFocus, int row, int column) {
+                Component cell = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+                cell.setForeground(Color.BLACK);
+                // Linhas alternadas: verde claro para linhas pares, branco para linhas ímpares
+                Color rowColor = (row % 2 == 0) ? ROW_ALTERNATE_GREEN : Color.WHITE;
+                // Quando selecionada, mantém a cor verde mas mais escura, ou cinza claro se for linha branca
+                Color selectedColor = (row % 2 == 0) ? ROW_SELECTED_GREEN : ROW_SELECTED_WHITE;
+                if (isSelected) {
+                    cell.setBackground(selectedColor);
+                } else {
+                    cell.setBackground(rowColor);
+                }
+                ((JLabel) cell).setHorizontalAlignment(JLabel.CENTER);
+                
+                // Ajustar tamanho da fonte se o texto não couber
+                if (value != null) {
+                    String texto = value.toString();
+                    JLabel label = (JLabel) cell;
+                    FontMetrics fm = label.getFontMetrics(label.getFont());
+                    int textWidth = fm.stringWidth(texto);
+                    int cellWidth = table.getColumnModel().getColumn(column).getWidth() - 10; // Margem de segurança
+                    
+                    if (textWidth > cellWidth && texto.length() > 0) {
+                        // Calcular novo tamanho de fonte proporcional
+                        float newSize = label.getFont().getSize() * ((float) cellWidth / textWidth);
+                        // Limitar tamanho mínimo da fonte
+                        if (newSize < 10) {
+                            newSize = 10;
+                        }
+                        label.setFont(label.getFont().deriveFont(newSize));
+                    } else {
+                        // Usar fonte padrão se couber
+                        label.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+                    }
+                }
+                
+                return cell;
+            }
+        };
         
         // Renderers customizados para manter texto visível quando selecionado
         DefaultTableCellRenderer textRenderer = new DefaultTableCellRenderer() {
@@ -307,16 +350,18 @@ public class ClientesView extends JPanel {
         tabelaClientes.getColumnModel().getColumn(0).setPreferredWidth(200);
         tabelaClientes.getColumnModel().getColumn(1).setPreferredWidth(250);
         tabelaClientes.getColumnModel().getColumn(2).setPreferredWidth(200);
-        tabelaClientes.getColumnModel().getColumn(3).setPreferredWidth(150);
+        tabelaClientes.getColumnModel().getColumn(3).setPreferredWidth(150);  // Telefone
+        tabelaClientes.getColumnModel().getColumn(4).setPreferredWidth(150);  // Ações (mudou de 3 para 4)
         
         // Aplicar renderer customizado nas colunas de texto
-        tabelaClientes.getColumnModel().getColumn(0).setCellRenderer(textRenderer);
+        tabelaClientes.getColumnModel().getColumn(0).setCellRenderer(nomeRenderer);  // Renderer especial para nome
         tabelaClientes.getColumnModel().getColumn(1).setCellRenderer(textRenderer);
         tabelaClientes.getColumnModel().getColumn(2).setCellRenderer(textRenderer);
+        tabelaClientes.getColumnModel().getColumn(3).setCellRenderer(textRenderer);  // Adicionar para telefone
         
-        // Renderer e Editor para coluna de Ações
-        tabelaClientes.getColumnModel().getColumn(3).setCellRenderer(new AcoesClienteCellRenderer());
-        tabelaClientes.getColumnModel().getColumn(3).setCellEditor(new AcoesClienteCellEditor());
+        // Renderer e Editor para coluna de Ações (mudou de 3 para 4)
+        tabelaClientes.getColumnModel().getColumn(4).setCellRenderer(new AcoesClienteCellRenderer());
+        tabelaClientes.getColumnModel().getColumn(4).setCellEditor(new AcoesClienteCellEditor());
         
         // Listener para seleção de cliente
         tabelaClientes.getSelectionModel().addListSelectionListener(e -> {
@@ -329,17 +374,27 @@ public class ClientesView extends JPanel {
             }
         });
         
-        // Listener para clique no nome do cliente
+        // Listener para clique no nome do cliente e exibição de conteúdo completo
         tabelaClientes.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = tabelaClientes.rowAtPoint(e.getPoint());
                 int col = tabelaClientes.columnAtPoint(e.getPoint());
-                if (row >= 0 && col == 0) { // Coluna Nome
-                    if (row < clientesFiltrados.size()) {
+                
+                if (row >= 0 && row < tabelaClientes.getRowCount() && col >= 0 && col < tabelaClientes.getColumnCount()) {
+                    // Selecionar cliente ao clicar na coluna Nome (sem mostrar modal)
+                    if (col == 0 && row < clientesFiltrados.size()) {
                         clienteSelecionado = clientesFiltrados.get(row);
                         carregarMesasDoCliente(clienteSelecionado.getId());
                         tabelaClientes.setRowSelectionInterval(row, row);
+                    } else if (col != 4 && col != 0) {
+                        // Exibir conteúdo completo ao clicar em qualquer célula (exceto ações e nome)
+                        Object value = tabelaClientes.getValueAt(row, col);
+                        if (value != null) {
+                            String texto = value.toString();
+                            String nomeColuna = tabelaClientes.getColumnName(col);
+                            mostrarConteudoCompleto(nomeColuna, texto);
+                        }
                     }
                 }
             }
@@ -668,6 +723,7 @@ public class ClientesView extends JPanel {
                 cliente.getNome() != null ? cliente.getNome() : "",
                 cliente.getEndereco() != null ? cliente.getEndereco() : "",
                 cliente.getCidade() != null ? cliente.getCidade() : "",
+                cliente.getTelefone() != null ? cliente.getTelefone() : "",  // Adicionar telefone
                 ""
             };
             clientesTableModel.addRow(row);
@@ -848,6 +904,27 @@ public class ClientesView extends JPanel {
             grupoEditor.setMesasList(mesasDoNumero);
             grupoTable.getColumnModel().getColumn(5).setCellEditor(grupoEditor);
             
+            // Listener para exibir conteúdo completo ao clicar em células
+            grupoTable.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int row = grupoTable.rowAtPoint(e.getPoint());
+                    int col = grupoTable.columnAtPoint(e.getPoint());
+                    
+                    if (row >= 0 && row < grupoTable.getRowCount() && col >= 0 && col < grupoTable.getColumnCount()) {
+                        // Exibir conteúdo completo ao clicar em qualquer célula (exceto ações)
+                        if (col != 5) { // Não mostrar para coluna de ações
+                            Object value = grupoTable.getValueAt(row, col);
+                            if (value != null) {
+                                String texto = value.toString();
+                                String nomeColuna = grupoTable.getColumnName(col);
+                                mostrarConteudoCompleto(nomeColuna, texto);
+                            }
+                        }
+                    }
+                }
+            });
+            
             // Adicionar dados à tabela
             for (Mesa mesa : mesasDoNumero) {
                 Object[] row = {
@@ -879,7 +956,7 @@ public class ClientesView extends JPanel {
     private void mostrarDialogoAdicionarCliente() {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
                 "Adicionar Cliente", true);
-        dialog.setSize(450, 560);
+        dialog.setSize(500, 650);
         dialog.setResizable(false);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
@@ -924,6 +1001,15 @@ public class ClientesView extends JPanel {
                 BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)));
         formPanel.add(txtCidade, gbc);
+
+        gbc.gridy++;
+        PlaceholderTextField txtTelefone = new PlaceholderTextField("Telefone");  // Adicionar campo telefone
+        txtTelefone.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+        txtTelefone.setPreferredSize(new Dimension(0, 40));
+        txtTelefone.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
+                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        formPanel.add(txtTelefone, gbc);
 
         gbc.gridy++;
         PlaceholderTextField txtNumero = new PlaceholderTextField("Número da Mesa");
@@ -999,6 +1085,7 @@ public class ClientesView extends JPanel {
             String nome = txtNome.getText().trim();
             String endereco = txtEndereco.getText().trim();
             String cidade = txtCidade.getText().trim();
+            String telefone = txtTelefone.getText().trim();  // Adicionar
             String numero = txtNumero.getText().trim();
             String dataStr = txtData.getText().trim();
             String registro = txtRegistro.getText().trim();
@@ -1026,7 +1113,7 @@ public class ClientesView extends JPanel {
                 data_d = new Date(System.currentTimeMillis());
             }
 
-            if (controller.inserirComMesa(nome, endereco, cidade, numero, data_d, registro)) {
+            if (controller.inserirComMesa(nome, endereco, cidade, telefone, numero, data_d, registro)) {  // Atualizar chamada
                 JOptionPane.showMessageDialog(dialog, "Cliente adicionado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
                 dialog.dispose();
                 carregarDados();
@@ -1222,7 +1309,7 @@ public class ClientesView extends JPanel {
     private void editarCliente(Cliente cliente) {
         JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this), 
                                  "Editar Cliente", true);
-        dialog.setSize(450, 280); 
+        dialog.setSize(500, 350); 
         dialog.setResizable(false);
         dialog.setLocationRelativeTo(this);
         dialog.setLayout(new BorderLayout());
@@ -1288,6 +1375,23 @@ public class ClientesView extends JPanel {
             BorderFactory.createEmptyBorder(5, 10, 5, 10)));
         formPanel.add(txtCidade, gbc);
 
+        gbc.gridx = 0;
+        gbc.gridy = 3;  // Mudar de 2 para 3
+        gbc.weightx = 0.2;
+        JLabel lblTelefone = new JLabel("Telefone:");  // Adicionar campo telefone
+        lblTelefone.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        formPanel.add(lblTelefone, gbc);
+        
+        gbc.gridx = 1;
+        gbc.weightx = 0.8;
+        JTextField txtTelefone = new JTextField(cliente.getTelefone() != null ? cliente.getTelefone() : "", 20);
+        txtTelefone.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        txtTelefone.setPreferredSize(new Dimension(0, 35));
+        txtTelefone.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
+            BorderFactory.createEmptyBorder(5, 10, 5, 10)));
+        formPanel.add(txtTelefone, gbc);
+
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         buttonPanel.setBackground(Color.WHITE);
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
@@ -1332,6 +1436,7 @@ public class ClientesView extends JPanel {
             String novoNome = txtNome.getText().trim();
             String novoEndereco = txtEndereco.getText().trim();
             String novaCidade = txtCidade.getText().trim();
+            String novoTelefone = txtTelefone.getText().trim();  // Adicionar
 
             if (novoNome.isEmpty() || novoEndereco.isEmpty() || novaCidade.isEmpty()) {
                 JOptionPane.showMessageDialog(dialog, "Por favor, preencha todos os campos obrigatórios!", "Validação",
@@ -1342,6 +1447,7 @@ public class ClientesView extends JPanel {
             cliente.setNome(novoNome);
             cliente.setEndereco(novoEndereco);
             cliente.setCidade(novaCidade);
+            cliente.setTelefone(novoTelefone);  // Adicionar
             
             if (controller.atualizar(cliente)) {
                 JOptionPane.showMessageDialog(dialog, "Cliente atualizado com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
@@ -1596,5 +1702,100 @@ public class ClientesView extends JPanel {
                 JOptionPane.showMessageDialog(this, "Erro ao excluir mesa!", "Erro", JOptionPane.ERROR_MESSAGE);
             }
         }
+    }
+    
+    // Método utilitário para exibir conteúdo completo de células
+    private void mostrarConteudoCompleto(String nomeColuna, String conteudo) {
+        if (conteudo == null || conteudo.trim().isEmpty()) {
+            return;
+        }
+        
+        JDialog dialog = new JDialog((Frame) SwingUtilities.getWindowAncestor(this),
+                "Conteúdo Completo - " + nomeColuna, true);
+        dialog.setLocationRelativeTo(this);
+        dialog.setLayout(new BorderLayout());
+        dialog.getContentPane().setBackground(Color.WHITE);
+        
+        JPanel mainPanel = new JPanel(new BorderLayout());
+        mainPanel.setBackground(Color.WHITE);
+        mainPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+        
+        JLabel labelTitulo = new JLabel(nomeColuna + ":");
+        labelTitulo.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        labelTitulo.setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
+        mainPanel.add(labelTitulo, BorderLayout.NORTH);
+        
+        JTextArea textArea = new JTextArea(conteudo);
+        textArea.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        textArea.setWrapStyleWord(true);
+        textArea.setLineWrap(true);
+        textArea.setEditable(false);
+        textArea.setBackground(Color.WHITE);
+        textArea.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(LIGHT_GREY.darker(), 1),
+            BorderFactory.createEmptyBorder(10, 10, 10, 10)));
+        
+        // Calcular tamanho necessário baseado no conteúdo
+        FontMetrics fm = textArea.getFontMetrics(textArea.getFont());
+        int lineHeight = fm.getHeight();
+        
+        // Estimar número de linhas baseado no comprimento do texto
+        int estimatedLines = 1;
+        int baseWidth = 500; // Largura base para cálculo
+        String[] palavras = conteudo.split("\\s+");
+        int currentLineWidth = 0;
+        for (String palavra : palavras) {
+            int palavraWidth = fm.stringWidth(palavra + " ");
+            if (currentLineWidth + palavraWidth > baseWidth) {
+                estimatedLines++;
+                currentLineWidth = palavraWidth;
+            } else {
+                currentLineWidth += palavraWidth;
+            }
+        }
+        
+        // Calcular largura necessária (máximo de 700px, mínimo de 500px)
+        int textWidth = fm.stringWidth(conteudo);
+        int preferredWidth = Math.min(700, Math.max(500, textWidth + 120));
+        
+        // Calcular altura necessária (máximo de 500px, mínimo de 250px)
+        int preferredHeight = Math.min(500, Math.max(250, (estimatedLines * lineHeight) + 140));
+        
+        textArea.setPreferredSize(new Dimension(preferredWidth - 80, preferredHeight - 120));
+        
+        JScrollPane scrollPane = new JScrollPane(textArea);
+        scrollPane.setBorder(BorderFactory.createEmptyBorder());
+        scrollPane.setPreferredSize(new Dimension(preferredWidth - 80, preferredHeight - 120));
+        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        buttonPanel.setBackground(Color.WHITE);
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(15, 0, 0, 0));
+        
+        RoundedButton btnFechar = new RoundedButton("Fechar");
+        btnFechar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnFechar.setBackground(PRIMARY_BLUE);
+        btnFechar.setForeground(Color.WHITE);
+        btnFechar.setPreferredSize(new Dimension(100, 35));
+        btnFechar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnFechar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseEntered(MouseEvent evt) {
+                btnFechar.setBackground(HOVER_BLUE);
+            }
+            @Override
+            public void mouseExited(MouseEvent evt) {
+                btnFechar.setBackground(PRIMARY_BLUE);
+            }
+        });
+        btnFechar.addActionListener(e -> dialog.dispose());
+        
+        buttonPanel.add(btnFechar);
+        mainPanel.add(buttonPanel, BorderLayout.SOUTH);
+        
+        dialog.add(mainPanel);
+        dialog.pack();
+        dialog.setSize(preferredWidth, preferredHeight);
+        dialog.setVisible(true);
     }
 }
